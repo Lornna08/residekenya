@@ -1,0 +1,30 @@
+{
+  "database": "MariaDB 10.11.19",
+  "tables": 19,
+  "row_counts": {
+    "activity_log": 89,
+    "agents": 3,
+    "amenities": 15,
+    "bookings": 0,
+    "categories": 35,
+    "counties": 10,
+    "estates": 6,
+    "inquiries": 4,
+    "open_houses": 0,
+    "properties": 37,
+    "property_amenities": 198,
+    "property_images": 419,
+    "rate_limits": 1,
+    "settings": 20,
+    "submissions": 0,
+    "subscribers": 0,
+    "testimonials": 3,
+    "towns": 73,
+    "users": 2
+  },
+  "notes": [
+    "The SQL export contains zero inserted rows for bookings, open_houses, submissions and subscribers.",
+    "All 37 property reference codes in the SQL export match the supplied CSV.",
+    "The raw SQL export is not included in Git because it contains personal/contact data, account records, activity logs, IP addresses and password hashes."
+  ]
+}
