@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function PropertiesPage() { return <main><header className="site-header"><Link className="brand" href="/">RESIDE <span>KE</span></Link><nav><Link href="/">Home</Link></nav></header><section className="section"><p className="eyebrow">THE COLLECTION</p><h1>Explore properties</h1><p>Property listings will appear here after the database adapter and source records are migrated.</p></section></main>; }
