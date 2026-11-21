@@ -10,7 +10,6 @@ The Reside Ke property website (moved from cPanel / resideke.co.ke), running on 
 | `public/` | Static files served straight from Vercel's CDN: CSS, JS, logo/images and all existing property photos (`public/uploads/properties/`) |
 | `api/index.php` | Single entry point: maps every URL to the matching page in `app/` (same URLs as before, plus `/buy`, `/rent`, `/property/<slug>`, `/sitemap.xml`) |
 | `sql/schema.pgsql` | Database structure (Postgres) |
-| `migrate/` | One-time encrypted import of the old database (safe to delete once imported) |
 | `vercel.json` | Uses the `vercel-php` runtime (PHP 8.5) |
 
 ## Services

@@ -19,12 +19,6 @@ $__appRoot = realpath(__DIR__ . '/../app');
 $__path    = rawurldecode(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
 $__path    = '/' . ltrim(preg_replace('#/+#', '/', $__path), '/');
 
-// One-time data import endpoint (inert unless MIGRATE_KEY is set).
-if ($__path === '/__migrate') {
-    require __DIR__ . '/../migrate/run.php';
-    exit;
-}
-
 // --- Pretty URLs (from the original .htaccess) ---------------------------
 $__pretty = [
     '/buy'        => ['listings.php', ['purpose' => 'sale']],
