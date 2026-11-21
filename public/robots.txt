@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /includes/
+Disallow: /uploads/submissions/
+Disallow: /*?*sort=
+Disallow: /*?*page=
+
+Sitemap: https://residekenya.com/sitemap.xml

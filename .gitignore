@@ -1,13 +1,5 @@
-node_modules/
-.next/
-out/
-build/
 .env
 .env.*
-!.env.example
-.vercel/
-.DS_Store
-*.log
-coverage/
-legacy-reference/includes/config.php
-config.php
+.vercel
+*.sql.gz
+/tools/
