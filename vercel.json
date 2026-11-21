@@ -7,26 +7,47 @@
   "functions": {
     "api/index.php": {
       "runtime": "vercel-php@0.9.0",
-      "includeFiles": "{app,migrate}/**",
-      "maxDuration": 60
+      "maxDuration": 60,
+      "excludeFiles": "{public/**,.git/**,node_modules/**,vercel.json,README.md}"
     }
   },
   "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index.php" }
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.php"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=()" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "geolocation=(), microphone=(), camera=()"
+        }
       ]
     },
     {
       "source": "/(assets|uploads|admin/assets)/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=2592000" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000"
+        }
+      ]
     }
-  ]
+  ],
+  "fluid": false
 }
