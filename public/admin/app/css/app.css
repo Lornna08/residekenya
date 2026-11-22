@@ -1130,3 +1130,13 @@ html.is-nav .chat-fab,html.is-pv .chat-fab{display:none!important}
   table.is-cards td.tc-first .t-prop, table.is-cards td.tc-first .t-who { justify-content: flex-start; text-align: left; }
   table.is-cards td input[type=checkbox] { margin: 0; }
 }
+
+/* Phones: no edge fade on tables (they no longer scroll sideways), and no card-inside-a-card */
+@media (max-width: 700px) {
+  .t-wrap[data-fade], .table-wrap[data-fade] { -webkit-mask-image: none !important; mask-image: none !important; }
+  .panel:has(table.is-cards), .a-card:has(table.is-cards) { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+  .panel:has(table.is-cards) > .panel-head { padding: 0 2px 10px !important; border: 0 !important; background: transparent !important; }
+  .panel:has(table.is-cards) .table-wrap { padding: 0; }
+  table.is-cards tr { margin-bottom: 12px; }
+  table.is-cards tr:last-child { margin-bottom: 0; }
+}
