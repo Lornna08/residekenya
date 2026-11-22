@@ -2,6 +2,7 @@
 /** admin/property-edit.php — add or edit a property (full form). */
 require __DIR__ . '/../includes/bootstrap.php';
 require_login();
+ensure_schema();
 
 $id = input_int('id');
 $editing = false;
@@ -63,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'agent_id'         => input_int('agent_id') ?: null,
         'owner_name'       => trim((string) input('owner_name', '')) ?: null,
         'owner_contact'    => trim((string) input('owner_contact', '')) ?: null,
+        'source_url'       => trim((string) input('source_url', '')) ?: null,
         'is_featured'      => input('is_featured') ? 1 : 0,
         'is_luxury'        => input('is_luxury') ? 1 : 0,
         'airbnb_max_guests'   => input_int('airbnb_max_guests'),
@@ -128,6 +130,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stored) Database::run("INSERT INTO property_images (property_id, file_path, sort_order) VALUES (?,?,?)", [$propId, $stored, $i]);
         }
     }
+    // Photos already uploaded one-by-one by the admin photo uploader
+    $sortStart = (int) (Database::row("SELECT COALESCE(MAX(sort_order), -1) + 1 AS n FROM property_images WHERE property_id = ?", [$propId])['n'] ?? 0);
+    foreach (array_values((array) input('gallery_paths', [])) as $i => $path) {
+        $path = (string) $path;
+        if (!is_stored_upload($path)) continue;
+        Database::run("INSERT INTO property_images (property_id, file_path, sort_order) VALUES (?,?,?)", [$propId, $path, $sortStart + $i]);
+    }
+    if (!$editing || empty($p['featured_image'])) {
+        if (empty($data['featured_image'])) {
+            $first = Database::row("SELECT file_path FROM property_images WHERE property_id = ? AND is_floorplan = 0 ORDER BY sort_order, id LIMIT 1", [$propId]);
+            if ($first) Database::run("UPDATE properties SET featured_image = ? WHERE id = ? AND (featured_image IS NULL OR featured_image = '')", [$first['file_path'], $propId]);
+        }
+    }
+
     // Floorplan images
     if (!empty($_FILES['floorplans']['name']) && is_array($_FILES['floorplans']['name'])) {
         $n = count($_FILES['floorplans']['name']);
@@ -265,7 +281,7 @@ include __DIR__ . '/templates/layout-head.php';
           <?php if (!empty($p['brochure_pdf'])): ?><a class="muted" href="<?= e(asset_url($p['brochure_pdf'])) ?>" target="_blank" rel="noopener">Current brochure</a><?php endif; ?>
         </div>
       </div>
-      <div class="a-field"><label>Gallery images (multiple)</label><input class="a-input" type="file" name="gallery[]" accept="image/*" multiple></div>
+      <div class="a-field"><label>Gallery images — add as many as you like</label><input class="a-input" type="file" accept="image/*" multiple data-photo-uploader="gallery_paths"></div>
       <div class="a-field"><label>Floor plan images (multiple)</label><input class="a-input" type="file" name="floorplans[]" accept="image/*" multiple></div>
       <?php if ($gallery): ?>
         <label style="font-size:.8rem;color:var(--a-muted)">Existing gallery</label>
@@ -303,6 +319,7 @@ include __DIR__ . '/templates/layout-head.php';
       </select></div>
       <div class="a-field"><label>Owner name (private)</label><input class="a-input" type="text" name="owner_name" value="<?= $val('owner_name') ?>"></div>
       <div class="a-field"><label>Owner contact (private)</label><input class="a-input" type="text" name="owner_contact" value="<?= $val('owner_contact') ?>"></div>
+      <div class="a-field"><label>Where this listing came from — link (private)</label><input class="a-input" type="url" name="source_url" value="<?= $val('source_url') ?>" placeholder="https://…"></div>
     </div>
   </div>
 

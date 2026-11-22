@@ -18,7 +18,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16202c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Reside Admin">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="/admin/manifest.webmanifest">
+<link rel="icon" href="/admin/icons/admin-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/admin/icons/admin-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/admin/icons/admin-180.png">
 <title>Sign in — <?= e(SITE_NAME) ?> Admin</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">

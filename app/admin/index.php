@@ -22,6 +22,19 @@ $pageTitle = 'Dashboard';
 $activeAdmin = 'dashboard';
 include __DIR__ . '/templates/layout-head.php';
 ?>
+<div class="quick-row">
+  <a class="a-btn gold quick-cta" href="<?= e(url('admin/quick-listing.php')) ?>">+ New listing</a>
+  <div class="panel notify-card" id="notifyCard">
+    <div class="nc-text">
+      <strong>Phone notifications</strong> <span class="pill" data-n-status>Checking…</span>
+      <p class="muted" data-n-hint></p>
+    </div>
+    <div class="nc-actions">
+      <button type="button" class="a-btn sm gold" data-n-toggle hidden>Turn on notifications</button>
+      <button type="button" class="a-btn sm" data-n-test hidden>Send test</button>
+    </div>
+  </div>
+</div>
 <div class="stat-cards">
   <a class="a-card link" href="<?= e(url('admin/properties.php')) ?>"><div class="lbl">Total Properties</div><div class="num gold"><?= number_format($stats['properties']) ?></div></a>
   <a class="a-card link" href="<?= e(url('admin/properties.php?status=available')) ?>"><div class="lbl">Available</div><div class="num"><?= number_format($stats['available']) ?></div></a>

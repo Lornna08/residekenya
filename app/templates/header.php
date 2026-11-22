@@ -22,9 +22,11 @@ $activeNav = $activeNav ?? '';
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= e(url('assets/css/main.css')) ?>">
+<link rel="icon" href="<?= e(url('favicon.ico')) ?>" sizes="48x48">
 <link rel="icon" href="<?= e(url('assets/img/favicon-32.png')) ?>" sizes="32x32" type="image/png">
-<link rel="icon" href="<?= e(url('assets/img/favicon-512.png')) ?>" sizes="512x512" type="image/png">
+<link rel="icon" href="<?= e(url('assets/img/favicon-192.png')) ?>" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="<?= e(url('assets/img/favicon-180.png')) ?>">
+<link rel="manifest" href="<?= e(url('site.webmanifest')) ?>">
 <script>window.RESIDE_BASE = <?= json_encode(rtrim(BASE_URL, '/')) ?>;</script>
 <script>(function(){try{var d=<?= json_encode(setting('default_theme', 'light')) ?>;var t=localStorage.getItem('reside_theme')||d;if(t&&t!=='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
 <?= $extraHead ?? '' ?>

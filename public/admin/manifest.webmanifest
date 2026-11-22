@@ -1,0 +1,21 @@
+{
+  "name": "Reside Ke Admin",
+  "short_name": "Reside Admin",
+  "description": "Manage Reside Ke listings, inquiries and bookings.",
+  "id": "/admin/",
+  "start_url": "/admin/index.php?source=app",
+  "scope": "/admin/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1620",
+  "theme_color": "#16202c",
+  "icons": [
+    { "src": "/admin/icons/admin-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/admin/icons/admin-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/admin/icons/admin-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "New listing", "url": "/admin/quick-listing.php", "icons": [{ "src": "/admin/icons/admin-192.png", "sizes": "192x192" }] },
+    { "name": "Inquiries", "url": "/admin/inquiries.php", "icons": [{ "src": "/admin/icons/admin-192.png", "sizes": "192x192" }] }
+  ]
+}

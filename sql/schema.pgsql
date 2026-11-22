@@ -144,6 +144,7 @@ CREATE TABLE IF NOT EXISTS properties (
   meta_description varchar(300),
   seo_keywords varchar(255),
   views integer NOT NULL DEFAULT 0,
+  source_url varchar(500),
   expires_at date,
   created_by integer REFERENCES users(id) ON DELETE SET NULL,
   created_at timestamp NOT NULL DEFAULT NOW(),
@@ -264,6 +265,17 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   window_start timestamp NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_rl_bucket ON rate_limits(bucket);
+
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id serial PRIMARY KEY,
+  user_id integer REFERENCES users(id) ON DELETE CASCADE,
+  endpoint text NOT NULL UNIQUE,
+  p256dh text NOT NULL,
+  auth text NOT NULL,
+  user_agent varchar(255),
+  created_at timestamp NOT NULL DEFAULT NOW(),
+  last_ok_at timestamp
+);
 
 CREATE TABLE IF NOT EXISTS sessions (
   id varchar(128) PRIMARY KEY,

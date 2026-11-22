@@ -137,3 +137,128 @@ table.data .thumb { width: 52px; height: 40px; object-fit: cover; border-radius:
 .quick-add-btn { margin-left: .5rem; background: none; border: 0; color: var(--a-gold); cursor: pointer; font-size: .74rem; font-weight: 600; padding: 0; }
 .quick-add-btn:hover { text-decoration: underline; }
 .quick-add-btn:disabled { opacity: .6; cursor: default; }
+
+/* =====================================================================
+   Web app (iPhone home-screen) — safe areas, tab bar, mobile polish
+   ===================================================================== */
+html { background: var(--a-bg); -webkit-text-size-adjust: 100%; }
+body.admin { min-height: 100vh; min-height: 100dvh; }
+
+/* Header sits BELOW the iPhone status bar / Dynamic Island: solid colour, no blur,
+   padded by the safe-area inset so nothing is ever hidden behind it. */
+.admin-top {
+  padding-top: calc(1rem + env(safe-area-inset-top));
+  padding-left: max(1.6rem, env(safe-area-inset-left));
+  padding-right: max(1.6rem, env(safe-area-inset-right));
+  background: var(--a-surface);
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.admin-side { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+.login-wrap { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+
+.admin-scrim { position: fixed; inset: 0; background: rgba(5,8,12,.55); z-index: 55; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.admin-scrim.open { opacity: 1; pointer-events: auto; }
+
+/* Dashboard: quick action + notifications */
+.quick-row { display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: stretch; margin-bottom: 1.4rem; }
+.quick-cta { justify-content: center; font-size: 1rem; padding: .9rem 1.4rem; }
+.notify-card { margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 1.2rem; flex-wrap: wrap; }
+.notify-card p { margin: .35rem 0 0; font-size: .8rem; line-height: 1.45; }
+.notify-card p:empty { display: none; }
+.nc-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+.muted { color: var(--a-muted); }
+
+/* Bottom tab bar (phones) */
+.tabbar { display: none; }
+.tb-badge { position: absolute; top: 2px; left: calc(50% + 6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--a-danger); color: #fff; font-size: .68rem; font-weight: 700; line-height: 18px; text-align: center; }
+.tb-badge[hidden] { display: none; }
+
+@media (max-width: 860px) {
+  body.admin { font-size: 15px; }
+  .admin-top { padding-top: calc(.7rem + env(safe-area-inset-top)); padding-bottom: .7rem; }
+  .admin-top .who > span { display: none; }
+  .admin-top h1 { font-size: 1.05rem; }
+  .admin-body { padding: 1rem max(1rem, env(safe-area-inset-left)) calc(88px + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-right)) !important; }
+  .admin-side { width: 82vw; max-width: 300px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .admin-nav a { padding-top: .75rem; padding-bottom: .75rem; }
+  /* 16px inputs stop iOS from zooming the page when a field is tapped */
+  .a-input, .a-select, .a-textarea, input, select, textarea { font-size: 16px !important; }
+  .a-btn { min-height: 40px; }
+  .dash-grid { grid-template-columns: 1fr !important; }
+  .stat-cards { grid-template-columns: repeat(2, 1fr) !important; gap: .7rem !important; }
+  .quick-row { grid-template-columns: 1fr; }
+  .panel-head { flex-wrap: wrap; gap: .5rem; }
+
+  .tabbar {
+    display: grid; grid-template-columns: repeat(5, 1fr); align-items: end;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    padding: 6px max(8px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-right));
+    background: var(--a-surface); border-top: 1px solid var(--a-line);
+  }
+  .tabbar a { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 0; color: var(--a-muted); font-size: .68rem; font-weight: 500; -webkit-tap-highlight-color: transparent; }
+  .tabbar a.on { color: var(--a-gold); }
+  .tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .tabbar .tb-add { align-self: center; }
+  .tabbar .tb-add svg { width: 46px; height: 46px; padding: 11px; border-radius: 50%; background: var(--a-gold); color: #0f1620; stroke-width: 2.4; box-shadow: 0 6px 18px -6px rgba(78,168,131,.7); }
+  .admin-toggle { display: none !important; }
+}
+
+/* =====================================================================
+   Photo uploader + Quick Listing
+   ===================================================================== */
+.pu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: .6rem; margin-top: .8rem; }
+.pu-grid:empty { display: none; }
+.pu-tile { position: relative; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; border: 1px solid var(--a-line); background: var(--a-surface2); }
+.pu-tile img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: .55; transition: opacity .2s; }
+.pu-tile.done img { opacity: 1; }
+.pu-tile.is-cover { outline: 2px solid var(--a-gold); outline-offset: -2px; }
+.pu-tile.is-cover::before { content: "Cover"; position: absolute; left: 6px; bottom: 6px; z-index: 2; background: var(--a-gold); color: #0f1620; font-size: .66rem; font-weight: 700; padding: .15rem .45rem; border-radius: 5px; }
+.pu-tile.is-cover .pu-star { display: none; }
+.pu-bar { position: absolute; left: 8px; right: 8px; bottom: 8px; height: 4px; border-radius: 2px; background: rgba(0,0,0,.45); }
+.pu-bar i { display: block; height: 100%; width: 0; border-radius: 2px; background: var(--a-gold); transition: width .15s; }
+.pu-tile.done .pu-bar { display: none; }
+.pu-x { position: absolute; top: 5px; right: 5px; width: 26px; height: 26px; border-radius: 50%; border: 0; background: rgba(0,0,0,.6); color: #fff; font-size: 1rem; line-height: 1; cursor: pointer; }
+.pu-star { position: absolute; left: 6px; bottom: 6px; border: 0; border-radius: 5px; background: rgba(0,0,0,.6); color: #fff; font-size: .66rem; font-weight: 600; padding: .2rem .45rem; cursor: pointer; display: none; }
+.pu-tile.done .pu-star { display: block; }
+.pu-tile.failed { border-color: var(--a-danger); }
+.pu-err { position: absolute; inset: auto 0 0 0; background: rgba(215,90,69,.9); color: #fff; font-size: .66rem; padding: .3rem .4rem; }
+
+.ql { max-width: 760px; margin: 0 auto; }
+.ql-sec { padding: 1.1rem 1.2rem .4rem; margin-bottom: 1rem; }
+.ql-h { display: flex; align-items: center; gap: .6rem; font-size: 1rem; margin: 0 0 1rem; font-weight: 600; }
+.ql-h span { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--a-surface2); border: 1px solid var(--a-line); font-size: .75rem; color: var(--a-gold); }
+.ql-h small { font-weight: 400; font-size: .78rem; }
+.ql-drop { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: .4rem; padding: 1.4rem 1rem; margin-bottom: .9rem; border: 1.5px dashed var(--a-line); border-radius: 12px; cursor: pointer; transition: border-color .15s, background .15s; }
+.ql-drop:hover { border-color: var(--a-gold); background: rgba(78,168,131,.05); }
+.ql-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.ql-drop svg { width: 34px; height: 34px; fill: none; stroke: var(--a-gold); stroke-width: 1.6; stroke-linejoin: round; }
+.ql-drop b { font-size: 1rem; }
+.ql-drop small { color: var(--a-muted); font-size: .8rem; max-width: 34ch; }
+.ql-seg { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.1rem; }
+.ql-seg label { flex: 1 1 auto; }
+.ql-seg input, .ql-chips input { position: absolute; opacity: 0; pointer-events: none; }
+.ql-seg span { display: block; text-align: center; padding: .6rem .8rem; border: 1px solid var(--a-line); border-radius: 999px; font-size: .85rem; cursor: pointer; white-space: nowrap; }
+.ql-seg input:checked + span { background: var(--a-gold); border-color: var(--a-gold); color: #0f1620; font-weight: 600; }
+.ql-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .8rem; }
+.ql-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; margin-bottom: 1.1rem; }
+.ql-step { display: flex; flex-direction: column; gap: .35rem; font-size: .8rem; color: var(--a-muted); }
+.ql-step > div { display: flex; align-items: stretch; border: 1px solid var(--a-line); border-radius: var(--a-r-sm); overflow: hidden; background: var(--a-surface2); }
+.ql-step button { width: 38px; border: 0; background: transparent; color: var(--a-gold); font-size: 1.2rem; cursor: pointer; }
+.ql-step input { width: 100%; min-width: 0; border: 0; background: transparent; color: var(--a-text); text-align: center; font: inherit; font-size: 1rem; padding: .55rem 0; -moz-appearance: textfield; }
+.ql-step input::-webkit-outer-spin-button, .ql-step input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.ql-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.ql-chips span { display: inline-block; padding: .4rem .75rem; border: 1px solid var(--a-line); border-radius: 999px; font-size: .8rem; cursor: pointer; color: var(--a-muted); }
+.ql-chips input:checked + span { border-color: var(--a-gold); color: var(--a-text); background: rgba(78,168,131,.15); }
+.ql-bar { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: .8rem; flex-wrap: wrap; padding: .9rem 1.2rem; margin: 0 0 1rem; background: var(--a-surface); border: 1px solid var(--a-line); border-radius: var(--a-r); }
+.ql-bar-btns { display: flex; gap: .5rem; }
+.ql-done { max-width: 560px; margin: 2rem auto; text-align: center; padding: 2rem 1.4rem; }
+.ql-done-icon { width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 50%; display: grid; place-items: center; background: rgba(78,168,131,.15); color: var(--a-gold); font-size: 1.6rem; }
+.ql-done h2 { margin: 0 0 .3rem; }
+.ql-done-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-top: 1.4rem; }
+@media (max-width: 860px) {
+  .ql-sec { padding: 1rem .95rem .2rem; }
+  .ql-bar { bottom: calc(64px + env(safe-area-inset-bottom)); border-radius: 12px; }
+  .ql-bar-btns { width: 100%; }
+  .ql-bar-btns .a-btn { flex: 1; justify-content: center; }
+}
+@media (max-width: 420px) { .ql-row { grid-template-columns: 1fr; } .ql-steps { gap: .4rem; } }

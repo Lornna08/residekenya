@@ -325,6 +325,12 @@ function blob_put(string $pathname, string $bytes, string $contentType): ?string
     return $res['url'] ?? null;
 }
 
+/** True for a path/URL produced by save_upload() (guards hidden form fields). */
+function is_stored_upload(string $path): bool
+{
+    return (bool) preg_match('#^(uploads/properties/[a-f0-9]{32}\.(jpe?g|png|webp|gif)|https://[a-z0-9.-]+\.blob\.vercel-storage\.com/uploads/properties/[a-f0-9]{32}\.(jpe?g|png|webp|gif))$#i', $path);
+}
+
 /** Remove a stored upload (Blob URL or local file). */
 function delete_upload(?string $path): void
 {

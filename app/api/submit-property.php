@@ -92,6 +92,11 @@ $body = '<h2 style="font-family:Georgia,serif;color:#16150f">New property submis
     . '<tr><td><strong>Description</strong></td><td>' . nl2br(e($description ?: '—')) . '</td></tr>'
     . '</table>';
 send_mail(setting('contact_email', ADMIN_EMAIL), 'New property submission — ' . SITE_NAME, $body);
+notify_admins(
+    '🏠 New property submitted — ' . $fullName,
+    trim(($propertyType ?: 'Property') . ' · ' . $propertyStatus . ($location ? ' · ' . $location : '') . ' · ' . $phone),
+    'admin/submissions.php', 'submission-' . time()
+);
 
 flash('success', 'Thank you! Your property has been submitted. Our team will review it and contact you shortly.');
 redirect($back);

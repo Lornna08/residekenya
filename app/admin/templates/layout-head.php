@@ -22,7 +22,17 @@ function a_nav(string $key, string $active, string $href, string $label, int $ba
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16202c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Reside Admin">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="/admin/manifest.webmanifest">
+<link rel="icon" href="/admin/icons/admin-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/admin/icons/admin-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/admin/icons/admin-180.png">
 <title><?= e($pageTitle) ?> — <?= e(SITE_NAME) ?> Admin</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,6 +41,8 @@ function a_nav(string $key, string $active, string $href, string $label, int $ba
 <link rel="stylesheet" href="<?= e(url('admin/assets/admin.css')) ?>">
 </head>
 <body class="admin">
+<script>window.RESIDE_ADMIN = <?= json_encode(['csrf' => csrf_token(), 'vapid' => vapid_public_key()]) ?>;</script>
+<div class="admin-scrim" id="adminScrim"></div>
 <div class="admin-shell">
   <aside class="admin-side" id="adminSide">
     <div class="admin-brand">Reside<b>&nbsp;Ke</b></div>
@@ -39,7 +51,8 @@ function a_nav(string $key, string $active, string $href, string $label, int $ba
       <?= a_nav('dashboard', $activeAdmin, 'index.php', 'Dashboard') ?>
       <div class="grp">Catalogue</div>
       <?= a_nav('properties', $activeAdmin, 'properties.php', 'Properties') ?>
-      <?= a_nav('property-edit', $activeAdmin, 'property-edit.php', 'Add Property') ?>
+      <?= a_nav('quick-listing', $activeAdmin, 'quick-listing.php', '+ Quick Listing') ?>
+      <?= a_nav('property-edit', $activeAdmin, 'property-edit.php', 'Add Property (full form)') ?>
       <?= a_nav('categories', $activeAdmin, 'categories.php', 'Categories') ?>
       <?= a_nav('locations', $activeAdmin, 'locations.php', 'Counties & Towns') ?>
       <?= a_nav('amenities', $activeAdmin, 'amenities.php', 'Amenities') ?>

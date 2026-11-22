@@ -17,6 +17,8 @@ The Reside Ke property website (moved from cPanel / resideke.co.ke), running on 
 - **Database:** Neon Postgres, connected in Vercel (`DATABASE_URL`).
 - **New uploads** (photos added in the admin, brochures, client submissions): Vercel Blob (`BLOB_READ_WRITE_TOKEN`). Photos are shrunk in the browser before upload because Vercel accepts at most ~4.5 MB per request.
 - **Logins** are stored in the database (`sessions` table), so they work across Vercel's servers.
+- **Admin app:** `/admin` installs to the iPhone home screen (Share → Add to Home Screen) and sends push notifications for new inquiries, viewing requests, bookings and submissions (`VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY`).
+- **Quick listing:** `/admin/quick-listing.php` — short phone-friendly form; photos upload one at a time so there's no limit on how many.
 - **Email:** outgoing email is off. Inquiries, viewing requests, bookings, property submissions and subscribers all land in the admin panel.
 
 ## Contact details
