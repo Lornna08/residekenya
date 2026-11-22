@@ -24,4 +24,4 @@ require __DIR__ . '/content.php';
 if (!empty($_COOKIE[SESSION_NAME]) || str_starts_with((string) ($_SERVER['SCRIPT_NAME'] ?? ''), '/admin/')) boot_session();
 
 // One-off upgrades run once, on the first request after a deploy.
-if ((int) setting('schema_version', '1') < 4) crm_schema();
+if ((int) setting('schema_version', '1') < 5) crm_schema();

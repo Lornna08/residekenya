@@ -245,7 +245,7 @@ function img_src(?string $path, int $w = 828): string
 /** Picture for a property-type tile: chosen image, else a listing photo, else a placeholder. */
 function cat_tile_image(array $cat): string
 {
-    if (!empty($cat['tile_image'])) return (string) $cat['tile_image'];
+    if ($img = real_photo($cat['tile_image'] ?? null)) return $img;
     return ph_url(ph_key_for(($cat['name'] ?? '') . ' ' . ($cat['slug'] ?? '')), 800);
 }
 

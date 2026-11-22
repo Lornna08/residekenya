@@ -18,13 +18,23 @@ const CRM_STATUS_TO_DB = ['active' => 'available', 'under_offer' => 'under_offer
 function crm_schema(): void
 {
     $ver = (int) setting('schema_version', '1');
-    if ($ver >= 4) return;
+    if ($ver >= 5) return;
     ensure_schema();
     if ($ver < 3) crm_schema_v3();
-    // v4: Reside Kenya branding and the luxury dark theme as the site default.
-    Database::run("UPDATE settings SET setting_value = regexp_replace(setting_value, 'Reside Ke(?!nya)', 'Reside Kenya', 'g') WHERE setting_value ~ 'Reside Ke(?!nya)'");
-    setting_save('default_theme', 'dark');
-    setting_save('schema_version', '4');
+    if ($ver < 4) {
+        // v4: Reside Kenya branding and the luxury dark theme as the site default.
+        Database::run("UPDATE settings SET setting_value = regexp_replace(setting_value, 'Reside Ke(?!nya)', 'Reside Kenya', 'g') WHERE setting_value ~ 'Reside Ke(?!nya)'");
+        setting_save('default_theme', 'dark');
+    }
+    // v5: drop the old generated "R · RESIDE KE" artwork so real photos or proper placeholders show instead.
+    $old = '(assets/img/(sample|cat)/|assets/img/(placeholder|cta)\\.jpg)';
+    Database::run("UPDATE properties SET featured_image = NULL WHERE featured_image ~ '$old'");
+    Database::run("DELETE FROM property_images WHERE file_path ~ '$old'");
+    Database::run("UPDATE categories SET image = NULL WHERE image ~ '$old'");
+    Database::run("DELETE FROM settings WHERE setting_key IN ('cta_image','hero_image','c_about_image') AND setting_value ~ '$old'");
+    // Listings that lost their only (fake) cover take their first real gallery photo, if any.
+    Database::run("UPDATE properties p SET featured_image = (SELECT file_path FROM property_images i WHERE i.property_id = p.id AND i.is_floorplan = 0 ORDER BY i.sort_order, i.id LIMIT 1) WHERE (p.featured_image IS NULL OR p.featured_image = '')");
+    setting_save('schema_version', '5');
 }
 
 function crm_schema_v3(): void
@@ -213,7 +223,7 @@ function crm_map_property(array $r, array $imgs, array $amen): array
         if ($u && $u['user_id']) $agentUser = 'u' . $u['user_id'];
     }
     if (!$agentUser && $r['created_by']) $agentUser = 'u' . $r['created_by'];
-    $images = array_map('asset_url', array_values(array_unique(array_filter(array_merge($r['featured_image'] ? [$r['featured_image']] : [], $imgs)))));
+    $images = array_map('asset_url', array_values(array_unique(array_filter(array_map('real_photo', array_merge([$r['featured_image']], $imgs))))));
     $noPhotos = !$images;
     if ($noPhotos) $images = [ph_url(ph_key_for(($r['purpose'] ?? '') . ' ' . ($r['category_name'] ?? '') . ' ' . $r['title']), 1080)];
     return [

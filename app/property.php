@@ -33,8 +33,8 @@ $isAirbnb = $p['purpose'] === 'airbnb';
 $displayPrice = (float) ($p['purpose'] === 'rent' || $isAirbnb ? ($p['rent_price'] ?? $p['price']) : ($p['sale_price'] ?? $p['price']));
 
 // Gallery source (fallback to featured image)
-$galleryImgs = $images;
-if (!$galleryImgs && !empty($p['featured_image'])) {
+$galleryImgs = array_values(array_filter($images, fn($i) => real_photo($i['file_path'] ?? null)));
+if (!$galleryImgs && real_photo($p['featured_image'] ?? null)) {
     $galleryImgs = [['file_path' => $p['featured_image'], 'alt_text' => $p['title']]];
 }
 $__noPhotos = !$galleryImgs;

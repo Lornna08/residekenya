@@ -19,16 +19,26 @@ $categories = Database::all("SELECT * FROM categories WHERE is_active = 1 ORDER 
 // For each category, find a representative property image:
 //   1) explicit category image (set in admin)  2) featured property in that category
 //   3) any available property in that category  — used by the homepage tiles.
+$__usedImg = [];
 foreach ($categories as $i => $cat) {
-    if (!empty($cat['image'])) { $categories[$i]['tile_image'] = $cat['image']; continue; }
-    $pick = Database::row(
-        "SELECT featured_image FROM properties
-         WHERE category_id = ? AND featured_image IS NOT NULL AND featured_image <> ''
-           AND status IN ('available','under_offer')
-         ORDER BY is_featured DESC, views DESC, created_at DESC LIMIT 1",
-        [$cat['id']]
-    );
-    $categories[$i]['tile_image'] = $pick['featured_image'] ?? null;
+    $img = real_photo($cat['image'] ?? null);
+    if (!$img) {
+        // Real photos from this category's listings, best first; skip ones another tile already shows.
+        $rows = Database::all(
+            "SELECT featured_image FROM properties
+             WHERE category_id = ? AND featured_image IS NOT NULL AND featured_image <> ''
+               AND status IN ('available','under_offer')
+             ORDER BY is_featured DESC, views DESC, created_at DESC LIMIT 6",
+            [$cat['id']]
+        );
+        foreach ($rows as $r) { $f = real_photo($r['featured_image']); if ($f && !isset($__usedImg[$f])) { $img = $f; break; } }
+    }
+    if (!$img) {
+        // No photo yet: a fitting placeholder, never the same one twice on the page.
+        foreach (ph_keys_for($cat['name'] . ' ' . $cat['slug']) as $k) { $u = ph_url($k, 800); if (!isset($__usedImg[$u])) { $img = $u; break; } }
+    }
+    $__usedImg[$img] = true;
+    $categories[$i]['tile_image'] = $img;
 }
 $allCategories = Database::all("SELECT id, name FROM categories WHERE is_active = 1 ORDER BY sort_order, name");
 $counties   = Database::all("SELECT c.*, (SELECT COUNT(*) FROM properties p WHERE p.county_id=c.id AND p.status='available') AS n FROM counties c WHERE is_active = 1 ORDER BY sort_order LIMIT 10");

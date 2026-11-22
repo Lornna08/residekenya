@@ -39,7 +39,31 @@ function ph_url(string $key, int $w = 1200): string
 
 function is_placeholder(?string $src): bool
 {
-    return !$src || str_contains($src, 'images.unsplash.com/') || str_contains($src, 'placeholder.jpg');
+    return !$src || str_contains($src, 'images.unsplash.com/') || is_legacy_ph($src);
+}
+
+/** The old generated "R · RESIDE KE" artwork from the first site: never shown, treated as no photo. */
+function is_legacy_ph(?string $src): bool
+{
+    return $src !== null && $src !== '' && (bool) preg_match('#assets/img/(?:sample|cat)/|assets/img/(?:placeholder|cta)\.jpg#', $src);
+}
+
+/** Real photo or null: drops empty values and the old generated artwork. */
+function real_photo(?string $src): ?string
+{
+    return ($src === null || $src === '' || is_legacy_ph($src)) ? null : $src;
+}
+
+/** Placeholder keys that fit a type, best first (lets tiles avoid repeating a photo). */
+const PH_FAMILIES = [
+    'land' => ['land'], 'commercial' => ['commercial', 'office'], 'airbnb' => ['airbnb', 'stay', 'interior'],
+    'holiday' => ['holiday', 'beach'], 'apartment' => ['apartment', 'apartment2'],
+    'townhouse' => ['townhouse', 'townhouse2'], 'villa' => ['villa', 'house2'], 'house' => ['house', 'house2'],
+];
+function ph_keys_for(string $text): array
+{
+    $fam = PH_FAMILIES[ph_key_for($text)] ?? ['house'];
+    return array_values(array_unique(array_merge($fam, ['house', 'house2', 'villa', 'apartment2', 'townhouse2', 'living', 'interior', 'stay', 'beach', 'office'])));
 }
 
 /** Best placeholder for a property type / purpose name. */
@@ -61,7 +85,7 @@ function ph_key_for(string $text): string
 /** A listing photo, or a fitting placeholder when it has none. */
 function listing_image(?string $path, string $hint = ''): string
 {
-    return $path ? (string) $path : ph_url(ph_key_for($hint), 1080);
+    return real_photo($path) ?? ph_url(ph_key_for($hint), 1080);
 }
 
 /** srcset for Unsplash URLs (their CDN resizes on the fly). */
