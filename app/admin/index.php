@@ -49,6 +49,7 @@ header('Cache-Control: no-store');
 <script>window.RESIDE_BOOT = <?= json_encode($boot, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_INVALID_UTF8_SUBSTITUTE) ?>;</script>
 <?php foreach (['data', 'store', 'ui', 'app', 'pages-overview', 'pages-listings', 'pages-deals', 'pages-crm', 'pages-ops', 'live'] as $js): ?>
 <script src="/admin/app/js/<?= $js ?>.js?v=<?= $v ?>"></script>
+<script src="/admin/app/js/table-cards.js?v=<?= $v ?>" defer></script>
 <?php endforeach; ?>
 </body>
 </html>

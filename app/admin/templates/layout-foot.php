@@ -92,6 +92,7 @@
 </script>
 <script src="<?= e(url('assets/js/upload-resize.js')) ?>"></script>
 <script src="/admin/assets/photo-uploader.js"></script>
+<script src="/admin/app/js/table-cards.js?v=<?= ASSET_V ?>" defer></script>
 <?= $extraAdminFoot ?? '' ?>
 </body>
 </html>
