@@ -257,16 +257,18 @@
   };
 
   /* ======================= COMMISSIONS ======================= */
-  var CU = { agent: '', period: 12, status: '' };
+  var CU = { agent: '', period: 0, status: '' };
   ES.pages.commissions = {
     redrawOnResize: true,
     render: function (v) {
-      var now = Date.now(), yr = 365 * DAY;
+      var now = Date.now(), yr = CU.period === 0 ? 1e4 * DAY : 365 * DAY;
+      var allWon = st.wonDeals().concat(st.s.commissions), first = allWon.reduce(function (m, d) { return d.closedAt && new Date(d.closedAt) < m ? new Date(d.closedAt) : m; }, new Date());
+      var span = CU.period || Math.min(36, Math.max(6, (new Date().getFullYear() - first.getFullYear()) * 12 + new Date().getMonth() - first.getMonth() + 1)), rng = CU.period === 0 ? 'all time' : '12 months';
       var won = st.wonDeals().concat(st.s.commissions).filter(function (d) { return now - new Date(d.closedAt) < yr && (!CU.agent || d.agentId === CU.agent); });
       var open = st.openDeals().filter(function (d) { return !CU.agent || d.agentId === CU.agent; });
       var sum = function (arr) { return arr.reduce(function (a, d) { return a + st.commission(d); }, 0); };
       var projected = sum(open), earned = sum(won.filter(function (d) { return d.commissionStatus === 'earned'; })), approved = sum(won.filter(function (d) { return d.commissionStatus === 'approved'; })), paid = sum(won.filter(function (d) { return d.commissionStatus === 'paid'; }));
-      var series = st.commissionSeries(CU.period, CU.agent || null), target = st.s.settings.monthlyTarget * (CU.agent ? 1 / 5 : 1);
+      var series = st.commissionSeries(span, CU.agent || null), target = st.s.settings.monthlyTarget * (CU.agent ? 1 / 5 : 1);
       var thisM = series[series.length - 1].value;
       var byAgent = st.s.team.map(function (u) { return { u: u, v: sum(won.filter(function (d) { return d.agentId === u.id; })) }; }).filter(function (x) { return x.v; }).sort(function (a, b) { return b.v - a.v; });
       var types = {}; won.forEach(function (d) { var t = d.manual ? 'Added by hand' : st.prop(d.propertyId).type; types[t] = (types[t] || 0) + st.commission(d); });
@@ -278,11 +280,11 @@
         statCard('Projected', f.money(projected, true), open.length + ' open deals · not yet income', 'grey') +
         statCard('Earned', f.money(earned, true), 'Closed, awaiting approval', 'blue') +
         statCard('Approved', f.money(approved, true), 'Ready for payout', 'violet') +
-        statCard('Paid · 12 months', f.money(paid, true), 'Recorded as settled', 'green') + '</div>' +
-        '<div class="two"><article class="card"><header class="card__h"><span class="card__t">' + I('trend', 16) + 'Commission earned over time</span><span class="seg"><button data-c="p" data-p="6" class="' + (CU.period === 6 ? 'is-on' : '') + '">6M</button><button data-c="p" data-p="12" class="' + (CU.period === 12 ? 'is-on' : '') + '">12M</button></span></header><div class="legend" style="margin-bottom:6px"><span><i class="lg-dot" style="background:var(--blue)"></i>Earned</span><span><i class="lg-dash"></i>Target ' + f.money(target, true) + ' /mo</span></div><div id="cmc"></div></article>' +
+        statCard('Paid · ' + rng, f.money(paid, true), 'Recorded as settled', 'green') + '</div>' +
+        '<div class="two"><article class="card"><header class="card__h"><span class="card__t">' + I('trend', 16) + 'Commission earned over time</span><span class="seg"><button data-c="p" data-p="0" class="' + (CU.period === 0 ? 'is-on' : '') + '">All</button><button data-c="p" data-p="6" class="' + (CU.period === 6 ? 'is-on' : '') + '">6M</button><button data-c="p" data-p="12" class="' + (CU.period === 12 ? 'is-on' : '') + '">12M</button></span></header><div class="legend" style="margin-bottom:6px"><span><i class="lg-dot" style="background:var(--blue)"></i>Earned</span><span><i class="lg-dash"></i>Target ' + f.money(target, true) + ' /mo</span></div><div id="cmc"></div></article>' +
         '<article class="card"><header class="card__h"><span class="card__t">' + I('trophy', 16) + 'This month vs target</span></header><div class="stat"><b>' + f.money(thisM, true) + '</b><em>of ' + f.money(target, true) + ' target · ' + Math.round(thisM / target * 100) + '%</em></div><div class="prog" style="margin:12px 0 18px"><i style="width:' + Math.min(100, thisM / target * 100) + '%"></i></div>' +
-        '<h3 style="font-size:12.5px;color:var(--ink-3);font-weight:600;margin-bottom:10px">By agent · 12 months</h3>' + (byAgent.length ? ES.chart.hbars(byAgent.map(function (x) { return { html: ES.av(x.u, 20) + esc(x.u.name), value: x.v }; }), { vfmt: function (n) { return f.money(n, true); } }) : '<p class="muted">No closed deals.</p>') + '</article></div>' +
-        '<div class="two"><article class="card"><header class="card__h"><span class="card__t">' + I('building', 16) + 'By property type</span></header><div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap">' + ES.chart.donut(tParts, { center: f.money(sum(won), true).replace('KES ', ''), sub: 'KES · 12 months' }) + '<div class="legend" style="flex-direction:column;gap:8px">' + tParts.map(function (x) { return '<span><i class="lg-dot" style="background:' + x.color + '"></i>' + esc(x.label) + ' · <b style="color:var(--ink)">' + f.money(x.value, true) + '</b></span>'; }).join('') + '</div></div></article>' +
+        '<h3 style="font-size:12.5px;color:var(--ink-3);font-weight:600;margin-bottom:10px">By agent · ' + rng + '</h3>' + (byAgent.length ? ES.chart.hbars(byAgent.map(function (x) { return { html: ES.av(x.u, 20) + esc(x.u.name), value: x.v }; }), { vfmt: function (n) { return f.money(n, true); } }) : '<p class="muted">No closed deals.</p>') + '</article></div>' +
+        '<div class="two"><article class="card"><header class="card__h"><span class="card__t">' + I('building', 16) + 'By property type</span></header><div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap">' + ES.chart.donut(tParts, { center: f.money(sum(won), true).replace('KES ', ''), sub: 'KES · ' + rng }) + '<div class="legend" style="flex-direction:column;gap:8px">' + tParts.map(function (x) { return '<span><i class="lg-dot" style="background:' + x.color + '"></i>' + esc(x.label) + ' · <b style="color:var(--ink)">' + f.money(x.value, true) + '</b></span>'; }).join('') + '</div></div></article>' +
         '<article class="card"><header class="card__h"><span class="card__t">' + I('layers', 16) + 'Projected from open deals</span></header>' + (open.length ? ES.chart.hbars(open.slice().sort(function (a, b) { return st.commission(b) - st.commission(a); }).slice(0, 6).map(function (d) { return { label: st.prop(d.propertyId).title, value: st.commission(d), sub: st.stage(d.stage).p + '%', color: st.stage(d.stage).c }; }), { vfmt: function (n) { return f.money(n, true); } }) : '<p class="muted">No open deals.</p>') + '</article></div>' +
         '<div class="tb"><h2 style="font-size:16px;font-weight:650">Commission records</h2><span class="tb__sp"></span><span class="seg">' + [['', 'All'], ['earned', 'Earned'], ['approved', 'Approved'], ['paid', 'Paid']].map(function (o) { return '<button data-c="st" data-v="' + o[0] + '" class="' + (CU.status === o[0] ? 'is-on' : '') + '">' + o[1] + '</button>'; }).join('') + '</span></div>' +
         '<div class="t-wrap"><table class="t"><thead><tr><th>Deal</th><th>Property</th><th>Agent</th><th class="r">Deal value</th><th class="r">Rate</th><th class="r">Commission</th><th>Status</th><th>Closed</th><th></th></tr></thead><tbody>' +
