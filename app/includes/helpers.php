@@ -17,8 +17,10 @@ function boot_session(): void
         session_set_save_handler($handler, true);
     }
     session_name(SESSION_NAME);
+    // Stay signed in on this device: the cookie lasts 90 days and is renewed every time the site is used.
+    ini_set('session.gc_maxlifetime', (string) SESSION_DAYS * 86400);
     session_set_cookie_params([
-        'lifetime' => 0,
+        'lifetime' => SESSION_DAYS * 86400,
         'path'     => '/',
         'secure'   => $secure,
         'httponly' => true,

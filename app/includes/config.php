@@ -35,6 +35,7 @@ define('BLOB_TOKEN', getenv('BLOB_READ_WRITE_TOKEN') ?: '');
 
 // ---- Security ----
 define('SESSION_NAME', 'reside_sess');
+define('SESSION_DAYS', 90);
 define('CSRF_TOKEN_NAME', '_csrf');
 define('APP_KEY', getenv('APP_KEY') ?: 'reside-kenya-local-key');
 

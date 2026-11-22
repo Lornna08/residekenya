@@ -113,7 +113,7 @@ class DbSessionHandler implements SessionHandlerInterface, SessionUpdateTimestam
 
     public function read(string $id): string|false
     {
-        $row = Database::row("SELECT data FROM sessions WHERE id = ? AND updated_at > NOW() - INTERVAL '7 days'", [$id]);
+        $row = Database::row("SELECT data FROM sessions WHERE id = ? AND updated_at > NOW() - INTERVAL '" . (int) SESSION_DAYS . " days'", [$id]);
         return $row['data'] ?? '';
     }
 
@@ -135,7 +135,7 @@ class DbSessionHandler implements SessionHandlerInterface, SessionUpdateTimestam
 
     public function gc(int $max_lifetime): int|false
     {
-        return Database::run("DELETE FROM sessions WHERE updated_at < NOW() - INTERVAL '7 days'");
+        return Database::run("DELETE FROM sessions WHERE updated_at < NOW() - INTERVAL '" . (int) SESSION_DAYS . " days'");
     }
 
     public function validateId(string $id): bool
