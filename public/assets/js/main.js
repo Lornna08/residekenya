@@ -19,24 +19,25 @@
   }
   var themeBtn = document.getElementById("themeBtn");
   var themeMenu = document.getElementById("themeMenu");
+  function closeThemeMenu() {
+    if (themeMenu) themeMenu.classList.remove("open");
+    if (themeBtn) themeBtn.setAttribute("aria-expanded", "false");
+  }
   if (themeBtn && themeMenu) {
     themeBtn.addEventListener("click", function (e) {
       e.stopPropagation();
       var open = themeMenu.classList.toggle("open");
       themeBtn.setAttribute("aria-expanded", String(open));
     });
-    themeMenu.querySelectorAll("[data-theme-choice]").forEach(function (b) {
-      b.addEventListener("click", function () {
-        applyTheme(b.getAttribute("data-theme-choice"));
-        themeMenu.classList.remove("open");
-        themeBtn.setAttribute("aria-expanded", "false");
-      });
-    });
-    document.addEventListener("click", function (e) {
-      if (!themeMenu.contains(e.target) && e.target !== themeBtn) themeMenu.classList.remove("open");
-    });
-    applyTheme(currentTheme());
   }
+  // Every theme button on the page (header menu and anywhere else) switches the theme.
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest("[data-theme-choice]") : null;
+    if (b) { applyTheme(b.getAttribute("data-theme-choice")); closeThemeMenu(); return; }
+    if (themeMenu && !themeMenu.contains(e.target) && !(themeBtn && themeBtn.contains(e.target))) closeThemeMenu();
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeThemeMenu(); });
+  applyTheme(currentTheme());
 
   /* Mobile nav */
   var toggle = document.getElementById("navToggle");

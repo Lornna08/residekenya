@@ -380,7 +380,7 @@ h1, h2, h3, h4 { font-family: var(--display); font-weight: 500; line-height: 1.0
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .footer-grid { grid-template-columns: 1fr 1fr; }
-  .nav-links, .nav-cta .btn--ghost, .theme-switch { display: none; }
+  .nav-links, .nav-cta .btn--ghost { display: none; }
   .nav-toggle { display: block; }
   .mobile-menu.open { display: flex; flex-direction: column; gap: .4rem; padding: 1rem var(--gutter) 1.5rem; border-top: 1px solid var(--line); background: var(--surface); }
   .mobile-menu a { padding: .7rem 0; border-bottom: 1px solid var(--line); }
@@ -632,12 +632,30 @@ select, input, textarea { color-scheme: light; }
 .socials--inline a:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ---- Phones: cleaner header and a lighter hero ---- */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+@media (max-width: 900px) {
+  .nav-cta { gap: .35rem; }
+  .theme-btn { width: 36px; height: 36px; border: 0; background: transparent; }
+  .theme-btn svg { width: 22px; height: 22px; }
+  .theme-menu { position: fixed; top: 64px; right: var(--gutter); min-width: 190px; }
+}
 @media (max-width: 640px) {
+  .nav { height: 64px; }
   .site-header .brand-word { display: none; }
-  .site-header .brand-mark { height: 38px; }
-  .hero .eyebrow { font-size: .62rem; letter-spacing: .16em; gap: .5rem; }
-  .hero .eyebrow::before { width: 18px; }
-  .hero h1 { font-size: clamp(2rem, 9vw, 2.5rem); }
-  .hero p.lede { font-size: .92rem; line-height: 1.5; margin-top: .7rem; max-width: 34ch; color: rgba(255,255,255,.82); }
-  .page-hero .eyebrow { font-size: .62rem; }
+  .site-header .brand-mark { height: 36px; }
+  .hero { min-height: 0; }
+  .hero__inner { padding-top: 34vh; padding-bottom: 22px; }
+  .hero .eyebrow { font-size: 9px; letter-spacing: .14em; gap: .45rem; margin-bottom: .35rem; }
+  .hero .eyebrow::before { width: 14px; }
+  .hero h1 { font-size: 26px; line-height: 1.12; max-width: 18ch; }
+  .hero p.lede { font-size: 12.5px; line-height: 1.45; margin-top: .45rem; max-width: 40ch; color: rgba(255,255,255,.8); }
+  .hero .search-panel { margin-top: 16px; padding: 12px; border-radius: 16px; }
+  .hero .search-tabs { margin-bottom: .6rem; padding: .2rem; }
+  .hero .search-tabs button { padding: .4em 1em; font-size: .8rem; }
+  .hero .search-grid { gap: .5rem; }
+  .hero .search-field { gap: .2rem; }
+  .hero .search-field label { font-size: .58rem; }
+  .hero .search-field select, .hero .search-field input { padding: .5em .65em; font-size: 14px; }
+  .hero .search-submit .btn { padding: .7em 1.2em; font-size: .85rem; }
+  .page-hero .eyebrow { font-size: 9px; }
 }

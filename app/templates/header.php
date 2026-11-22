@@ -68,15 +68,6 @@ $activeNav = $activeNav ?? '';
       <a href="<?= e(url($href)) ?>"><?= e($label) ?></a>
     <?php endforeach; ?>
     <a href="<?= e(url('list-property.php')) ?>">List Your Property</a>
-    <div class="mobile-themes">
-      <span class="mt-label">Theme</span>
-      <div class="mt-row">
-        <button data-theme-choice="light" title="Light Premium"><span class="sw" style="background:#2d5a4a"></span></button>
-        <button data-theme-choice="dark" title="Luxury Dark"><span class="sw" style="background:#0f1115;border-color:#4e9f7a"></span></button>
-        <button data-theme-choice="blue" title="Professional Blue"><span class="sw" style="background:#1f4e79"></span></button>
-        <button data-theme-choice="earth" title="Earth &amp; Nature"><span class="sw" style="background:#5f7150"></span></button>
-      </div>
-    </div>
   </div>
 </header>
 <main id="main">
