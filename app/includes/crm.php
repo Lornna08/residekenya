@@ -18,7 +18,7 @@ const CRM_STATUS_TO_DB = ['active' => 'available', 'under_offer' => 'under_offer
 function crm_schema(): void
 {
     $ver = (int) setting('schema_version', '1');
-    if ($ver >= 5) return;
+    if ($ver >= 6) return;
     ensure_schema();
     if ($ver < 3) crm_schema_v3();
     if ($ver < 4) {
@@ -35,6 +35,8 @@ function crm_schema(): void
     // Listings that lost their only (fake) cover take their first real gallery photo, if any.
     Database::run("UPDATE properties p SET featured_image = (SELECT file_path FROM property_images i WHERE i.property_id = p.id AND i.is_floorplan = 0 ORDER BY i.sort_order, i.id LIMIT 1) WHERE (p.featured_image IS NULL OR p.featured_image = '')");
     setting_save('schema_version', '5');
+    crm_seed_commissions();
+    setting_save('schema_version', '6');
 }
 
 function crm_schema_v3(): void
@@ -522,4 +524,36 @@ function crm_chat_push(array $m, int $uid): void
     $to = (int) $cm[1] === $uid ? (int) $cm[2] : (int) $cm[1];
     $me = current_user();
     try { notify_user($to, '💬 ' . ($me['name'] ?? 'Team'), mb_strimwidth((string) ($m['text'] ?: 'Shared a listing'), 0, 120, '…'), 'admin/#/chat', 'chat-' . $m['convId']); } catch (Throwable $e) {}
+}
+
+
+/**
+ * One-off: starter commission records (Aug 2025 to today, all closed by Lorna) for the owner to adjust.
+ * Amounts are in thousands of KES. Safe to re-run: records have fixed ids and are never overwritten.
+ */
+function crm_seed_commissions(): void
+{
+    $u = Database::row("SELECT id FROM users WHERE is_active = 1 AND LOWER(name) LIKE 'lorna%' ORDER BY id LIMIT 1")
+        ?: Database::row("SELECT id FROM users WHERE is_active = 1 ORDER BY id LIMIT 1");
+    if (!$u) return;
+    $agent = 'u' . $u['id'];
+    $amounts = [10, 15, 45, 100, 50, 76, 40, 40, 100, 260, 200, 150, 200, 200, 200, 250, 200, 120, 70, 250, 70, 150, 70];
+    $things = ['Land listing & marketing', 'House listing & marketing', 'Apartment listing & marketing', 'Land marketing', 'House marketing', 'Apartment marketing', 'Plot listing', 'Maisonette listing'];
+    $places = ['Kitengela', 'Ruiru', 'Kilimani', 'Syokimau', 'Juja', 'Ngong', 'Kileleshwa', 'Athi River', 'Thika Road', 'Kiambu', 'Rongai', 'Westlands'];
+    $from = strtotime('2025-08-01 12:00');
+    $to = time();
+    mt_srand(2025);
+    $dates = [];
+    foreach ($amounts as $i => $_) $dates[] = $from + (int) (($to - $from) * mt_rand(0, 1000) / 1000);
+    sort($dates);
+    foreach ($amounts as $i => $k) {
+        $id = 'cm-seed-' . ($i + 1);
+        if (crm_get('commissions', $id)) continue;
+        $title = $things[$i % count($things)] . ' — ' . $places[($i * 5 + 3) % count($places)];
+        crm_put('commissions', $id, [
+            'id' => $id, 'manual' => true, 'title' => $title, 'amount' => $k * 1000,
+            'closedAt' => gmdate('c', $dates[$i]), 'agentId' => $agent, 'commissionStatus' => 'paid',
+            'commissionNote' => '', 'kind' => 'sale', 'value' => 0, 'createdAt' => gmdate('c'),
+        ], (int) $u['id']);
+    }
 }

@@ -273,7 +273,7 @@
       var palette = ['#2F5BEA', '#1F9D6A', '#F59E0B', '#7C8CF8', '#0F1729', '#38BDF8'];
       var tParts = Object.keys(types).sort(function (a, b) { return types[b] - types[a]; }).map(function (k, i) { return { label: k, value: types[k], color: palette[i % palette.length] }; });
       var rows = won.filter(function (d) { return !CU.status || d.commissionStatus === CU.status; }).sort(function (a, b) { return new Date(b.closedAt) - new Date(a.closedAt); });
-      v.innerHTML = '<header class="ph"><h1>Commissions</h1><div class="ph__a"><button class="btn btn--dark" data-c="add">' + I('plus', 15) + 'Add commission</button><select class="sel" data-cf="agent" aria-label="Agent"><option value="">Whole team</option>' + st.s.team.map(function (u) { return '<option value="' + u.id + '"' + (CU.agent === u.id ? ' selected' : '') + '>' + u.name + '</option>'; }).join('') + '</select><button class="btn" data-c="csv">' + I('download', 15) + 'Export CSV</button></div></header>' +
+      v.innerHTML = '<header class="ph"><h1>Commissions</h1><div class="ph__a"><button class="btn" data-c="target">' + I('gear', 15) + 'Edit target</button><button class="btn btn--dark" data-c="add">' + I('plus', 15) + 'Add commission</button><select class="sel" data-cf="agent" aria-label="Agent"><option value="">Whole team</option>' + st.s.team.map(function (u) { return '<option value="' + u.id + '"' + (CU.agent === u.id ? ' selected' : '') + '>' + u.name + '</option>'; }).join('') + '</select><button class="btn" data-c="csv">' + I('download', 15) + 'Export CSV</button></div></header>' +
         '<div class="kgrid">' +
         statCard('Projected', f.money(projected, true), open.length + ' open deals · not yet income', 'grey') +
         statCard('Earned', f.money(earned, true), 'Closed, awaiting approval', 'blue') +
@@ -297,6 +297,7 @@
         if (k === 'ap') ES.try(function () { st.setCommissionStatus(b.dataset.id, 'approved'); }, 'Commission approved');
         if (k === 'pay') ES.confirm({ title: 'Record commission as paid?', icon: 'wallet', tone: 'green', ok: 'Record as paid', text: 'This marks the commission as settled in Reside Kenya. It’s a record only — no money moves.', onOk: function () { ES.try(function () { st.setCommissionStatus(b.dataset.id, 'paid'); }, 'Commission recorded as paid'); } });
         if (k === 'add') commissionModal(null);
+        if (k === 'target') targetModal();
         if (k === 'edit') commissionModal(b.dataset.id);
         if (k === 'csv') ES.csv('reside-ke-commissions.csv', [['Deal', 'Property', 'Type', 'Agent', 'Deal value (KES)', 'Rate', 'Commission (KES)', 'Status', 'Closed']].concat(rows.map(function (d) { return [d.manual ? 'Manual' : d.ref, d.manual ? d.title : st.prop(d.propertyId).title, d.kind, st.user(d.agentId).name, d.value, d.manual || d.commissionAmount != null ? 'custom' : d.kind === 'rent' ? st.s.settings.rentMonths + ' month(s)' : (d.rate != null ? d.rate : st.s.settings.saleRate) + '%', st.commission(d), d.commissionStatus, f.dateLong(d.closedAt)]; })));
       };
@@ -327,6 +328,16 @@
     if (del) del.onclick = function () { ES.confirm({ title: 'Remove this commission?', icon: 'wallet', tone: 'red', ok: 'Remove', text: 'It will disappear from your totals and charts. This can’t be undone.', onOk: function () { ES.try(function () { st.removeCommission(id); }, 'Commission removed'); ES.app.refresh(); } }); };
     var rs = panel.querySelector('#cmReset');
     if (rs) rs.onclick = function () { ES.try(function () { st.resetCommission(id); }, 'Back to the standard rate'); ES.close(); ES.app.refresh(); };
+  }
+  function targetModal() {
+    var s = st.s.settings;
+    var panel = ES.open('modal', ES.head('Monthly target', 'Shown on the overview and the commission charts') + '<form class="ovl__body" id="tgf" novalidate>' +
+      ES.field('Team monthly target (KES)', '<input name="monthlyTarget" data-num inputmode="numeric" value="' + s.monthlyTarget + '">', 'Each agent’s share is worked out from this') +
+      '</form><div class="ovl__foot"><button class="btn" data-close>Cancel</button><button class="btn btn--dark" id="tgSave">' + I('check', 15) + 'Save target</button></div>', { label: 'Monthly target' });
+    panel.querySelector('#tgSave').onclick = function () {
+      var v = ES.formData(panel.querySelector('#tgf'));
+      if (ES.try(function () { st.saveSettings(Object.assign({}, s, { monthlyTarget: v.monthlyTarget })); }, 'Target updated')) { ES.close(); ES.app.refresh(); }
+    };
   }
   function statCard(l, v, sub, tone) { return '<article class="card stat"><span>' + ES.pill(l, tone) + '</span><b style="margin-top:6px">' + v + '</b><em>' + sub + '</em></article>'; }
   ES.statCard = statCard;
