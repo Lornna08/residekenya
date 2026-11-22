@@ -25,7 +25,8 @@ header('Cache-Control: no-store');
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F1F3F8">
+<meta name="theme-color" content="#EEF2F8">
+<script>try{var d=document.documentElement,t=localStorage.getItem("reside_admin_theme")||"light";d.dataset.theme=t;if(localStorage.getItem("reside_side_min")==="1")d.classList.add("is-side-min");var n=JSON.parse(localStorage.getItem("reside_nav")||"{}");if(n.props)d.classList.add("g-props-off");if(n.site)d.classList.add("g-site-off");if(window.innerWidth>1180&&localStorage.getItem("reside_chat_open")==="0")d.classList.add("is-chat-off")}catch(e){}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">

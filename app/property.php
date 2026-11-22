@@ -37,6 +37,8 @@ $galleryImgs = $images;
 if (!$galleryImgs && !empty($p['featured_image'])) {
     $galleryImgs = [['file_path' => $p['featured_image'], 'alt_text' => $p['title']]];
 }
+$__noPhotos = !$galleryImgs;
+if ($__noPhotos) $galleryImgs = [['file_path' => ph_url(ph_key_for($p['purpose'] . ' ' . ($p['category_name'] ?? '') . ' ' . $p['title']), 1600), 'alt_text' => $p['title']]];
 
 $pageUrl = url('property.php?slug=' . eurl($p['slug']));
 $metaDesc = $p['meta_description'] ?: mb_substr(strip_tags($p['description'] ?? ''), 0, 155);
@@ -44,7 +46,7 @@ $seo = [
     'title'       => ($p['meta_title'] ?: $p['title']) . ' — ' . SITE_NAME,
     'description' => $metaDesc,
     'canonical'   => $pageUrl,
-    'image'       => !empty($galleryImgs) ? asset_url($galleryImgs[0]['file_path']) : url('assets/img/og-default.jpg'),
+    'image'       => !$__noPhotos ? asset_url($galleryImgs[0]['file_path']) : url('assets/img/og-default.jpg'),
     'type'        => 'article',
     'keywords'    => $p['seo_keywords'] ?? '',
 ];
@@ -95,7 +97,7 @@ include __DIR__ . '/templates/header.php';
         $isLast = ($i === 4 && count($galleryImgs) > 5);
     ?>
       <a href="<?= e($src) ?>" class="<?= $i === 0 ? 'g-main' : '' ?>" data-lb="<?= $i ?>" aria-label="View image <?= $i + 1 ?>">
-        <img src="<?= e(img_src($img['file_path'], $i === 0 ? 1200 : 828)) ?>" srcset="<?= e(img_srcset($img['file_path'], $i === 0 ? [828, 1200, 1920] : [640, 828])) ?>" sizes="<?= $i === 0 ? '(max-width: 900px) 100vw, 60vw' : '(max-width: 900px) 50vw, 25vw' ?>" alt="<?= e($alt) ?>" loading="<?= $i === 0 ? 'eager' : 'lazy' ?>" decoding="async"<?= $i === 0 ? ' fetchpriority="high"' : '' ?>>
+        <img src="<?= e(img_src($img['file_path'], $i === 0 ? 1200 : 828)) ?>" srcset="<?= e(ph_srcset($img['file_path'], [828, 1200]) ?: img_srcset($img['file_path'], $i === 0 ? [828, 1200, 1920] : [640, 828])) ?>" sizes="<?= $i === 0 ? '(max-width: 900px) 100vw, 60vw' : '(max-width: 900px) 50vw, 25vw' ?>" alt="<?= e($alt) ?>" loading="<?= $i === 0 ? 'eager' : 'lazy' ?>" decoding="async"<?= $i === 0 ? ' fetchpriority="high"' : '' ?>>
         <?php if ($isLast): ?><span class="g-more">+<?= count($galleryImgs) - 5 ?> photos</span><?php endif; ?>
       </a>
     <?php endforeach; ?>

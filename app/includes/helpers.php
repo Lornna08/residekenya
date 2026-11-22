@@ -89,6 +89,17 @@ function same_origin_request(): bool
 }
 
 /** Abort with 419 if CSRF invalid (for POST handlers). */
+/**
+ * Website editors call this at the top of their POST handler. A request with
+ * _draft=1 only updates the live preview; a real save clears the draft.
+ */
+function begin_site_save(): void
+{
+    boot_session();
+    if (input('_draft')) { $GLOBALS['SETTINGS_DRAFT'] = true; $_FILES = []; return; }
+    unset($_SESSION['site_draft']);
+}
+
 function require_csrf(): void
 {
     if (!csrf_verify()) {
@@ -167,6 +178,13 @@ function settings(): array
         foreach (Database::all("SELECT setting_key, setting_value FROM settings") as $r) {
             $cache[$r['setting_key']] = $r['setting_value'];
         }
+        // Admin preview: unsaved edits from the website editor are layered on top.
+        if (isset($_GET['preview']) && !empty($_COOKIE[SESSION_NAME])) {
+            boot_session();
+            if (!empty($_SESSION['user']['id']) && !empty($_SESSION['site_draft']) && is_array($_SESSION['site_draft'])) {
+                $cache = array_merge($cache, $_SESSION['site_draft']);
+            }
+        }
     }
     return $cache;
 }
@@ -179,6 +197,11 @@ function setting(string $key, $default = ''): string
 
 function setting_save(string $key, string $value): void
 {
+    if (!empty($GLOBALS['SETTINGS_DRAFT'])) { // preview only: keep it in this admin's session
+        boot_session();
+        $_SESSION['site_draft'][$key] = $value;
+        return;
+    }
     Database::run(
         "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
          ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value",
@@ -219,13 +242,11 @@ function img_src(?string $path, int $w = 828): string
     return '/_vercel/image?url=' . rawurlencode($u) . '&w=' . $w . '&q=70';
 }
 
-/** Picture for a property-type tile: chosen image, else a bundled one, else a listing photo. */
+/** Picture for a property-type tile: chosen image, else a listing photo, else a placeholder. */
 function cat_tile_image(array $cat): string
 {
     if (!empty($cat['tile_image'])) return (string) $cat['tile_image'];
-    $bundled = ['airbnb', 'apartments', 'commercial', 'holiday-homes', 'land', 'maisonettes', 'townhouses', 'villas'];
-    if (in_array($cat['slug'] ?? '', $bundled, true)) return 'assets/img/cat/' . $cat['slug'] . '.jpg';
-    return 'assets/img/placeholder.jpg';
+    return ph_url(ph_key_for(($cat['name'] ?? '') . ' ' . ($cat['slug'] ?? '')), 800);
 }
 
 /** srcset for responsive images: img_srcset($path, [384, 640, 1080]). */
@@ -249,6 +270,7 @@ function flash(string $key, ?string $msg = null)
 {
     // Reading a message needs no new session: a visitor without one has none waiting.
     if ($msg === null && session_status() !== PHP_SESSION_ACTIVE && empty($_COOKIE[SESSION_NAME])) return null;
+    if ($msg !== null && !empty($GLOBALS['SETTINGS_DRAFT'])) return null;
     boot_session();
     if ($msg !== null) { $_SESSION['_flash'][$key] = $msg; return null; }
     $v = $_SESSION['_flash'][$key] ?? null;
@@ -261,6 +283,11 @@ function flash(string $key, ?string $msg = null)
  * ------------------------------------------------------------------ */
 function redirect(string $to): void
 {
+    if (!empty($GLOBALS['SETTINGS_DRAFT'])) { // preview save: answer the editor instead of navigating
+        header('Content-Type: application/json');
+        echo json_encode(['ok' => true, 'draft' => true]);
+        exit;
+    }
     header('Location: ' . (preg_match('#^https?://#', $to) ? $to : url($to)));
     exit;
 }
@@ -307,6 +334,7 @@ function client_ip(): string
  * ------------------------------------------------------------------ */
 function log_activity(string $action, ?string $entity = null, ?int $entityId = null): void
 {
+    if (!empty($GLOBALS['SETTINGS_DRAFT'])) return;
     $uid = $_SESSION['user']['id'] ?? null;
     Database::run(
         "INSERT INTO activity_log (user_id, action, entity, entity_id, ip_address) VALUES (?,?,?,?,?)",

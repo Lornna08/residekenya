@@ -99,7 +99,7 @@
   function sel(k, ph, opts) { return '<select data-f="' + k + '" aria-label="' + ph + '"><option value="">' + ph + '</option>' + opts.map(function (o) { var val = typeof o === 'object' ? o.v : o, l = typeof o === 'object' ? o.l : o; return '<option value="' + val + '"' + (String(U[k]) === String(val) ? ' selected' : '') + '>' + esc(l) + '</option>'; }).join('') + '</select>'; }
   function grid(L, leadsBy) {
     return '<div class="lg">' + L.map(function (p) {
-      return '<a class="lc" href="#/property/' + p.id + '"><div class="lc__m"><img src="' + ES.img(p.images[0], 640) + '" alt="' + esc(p.title) + '" loading="lazy"><span class="lc__tag">' + ES.purposePill(p) + ES.statusPill(p.status) + '</span><span class="lc__ph">' + ES.av(st.user(p.agentId), 28) + '</span></div>' +
+      return '<a class="lc" href="#/property/' + p.id + '"><div class="lc__m"><img src="' + ES.img(p.images[0], 640) + '" alt="' + esc(p.title) + '" loading="lazy"><span class="lc__tag">' + ES.purposePill(p) + ES.statusPill(p.status) + (p.noPhotos ? ES.pill('Sample photo', 'amber') : '') + '</span><span class="lc__ph">' + ES.av(st.user(p.agentId), 28) + '</span></div>' +
         '<div class="lc__b"><span class="lc__t">' + esc(p.title) + '</span><span class="lc__l">' + I('pin', 12) + esc(p.area || p.city || 'Kenya') + ' · ' + esc(p.type) + '</span><span class="lc__p">' + priceLabel(p) + '</span>' +
         '<span class="lc__s">' + (p.beds ? '<span>' + I('bed', 14) + p.beds + ' bd</span>' : '') + (p.baths ? '<span>' + I('bath', 14) + p.baths + ' ba</span>' : '') + (p.size ? '<span>' + I('area', 14) + f.n(p.size) + ' m²</span>' : (p.plot ? '<span>' + I('area', 14) + esc(p.plot) + '</span>' : '')) + '</span>' +
         '<span class="lc__f"><span>' + p.ref + ' · ' + st.daysOnMarket(p) + ' days</span><span>' + (leadsBy[p.id] || 0) + ((leadsBy[p.id] || 0) === 1 ? ' lead · ' : ' leads · ') + f.n(p.views) + ' views</span></span></div></a>';
@@ -326,7 +326,7 @@
     var purpose0 = edit ? purposeOf(p) : (PURPOSE[qp] ? qp : 'sale');
     p = p || { title: '', type: ES.PTYPES[0] || 'Apartment', purpose: purpose0, category: purpose0 === 'rent' || purpose0 === 'airbnb' ? 'rent' : 'sale', rentPeriod: purpose0 === 'airbnb' ? 'night' : 'month', status: 'active', price: '', minPrice: '', estimate: '', area: '', city: (ES.COUNTIES || ['Nairobi'])[0], address: '', beds: '', baths: '', size: '', plot: '', parking: '', floors: 1, agentId: ES.config.userId, ownerId: '', ownerName: '', ownerContact: '', sourceUrl: '', amenities: [], images: [], description: '', featured: false };
     var owners = st.s.contacts.filter(function (c) { return c.types.some(function (t) { return t === 'owner' || t === 'seller' || t === 'landlord'; }); });
-    var photos = (p.images || []).filter(function (s) { return !/placeholder\.jpg/.test(s); }).slice();
+    var photos = (p.images || []).filter(function (s) { return !/placeholder\.jpg|images\.unsplash\.com/.test(s); }).slice();
     var amen = (ES.AMENITIES || []).slice(); (p.amenities || []).forEach(function (a) { if (amen.indexOf(a) < 0) amen.push(a); });
     var counties = (ES.COUNTIES || []).slice(); if (p.city && counties.indexOf(p.city) < 0) counties.unshift(p.city);
     var types = (ES.PTYPES || []).slice(); if (p.type && types.indexOf(p.type) < 0) types.unshift(p.type);

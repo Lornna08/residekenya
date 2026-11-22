@@ -214,7 +214,8 @@ function crm_map_property(array $r, array $imgs, array $amen): array
     }
     if (!$agentUser && $r['created_by']) $agentUser = 'u' . $r['created_by'];
     $images = array_map('asset_url', array_values(array_unique(array_filter(array_merge($r['featured_image'] ? [$r['featured_image']] : [], $imgs)))));
-    if (!$images) $images = [url('assets/img/placeholder.jpg')];
+    $noPhotos = !$images;
+    if ($noPhotos) $images = [ph_url(ph_key_for(($r['purpose'] ?? '') . ' ' . ($r['category_name'] ?? '') . ' ' . $r['title']), 1080)];
     return [
         'id' => 'p' . $r['id'], 'dbId' => (int) $r['id'], 'ref' => $r['ref_code'], 'slug' => $r['slug'], 'url' => url('property/' . $r['slug']),
         'title' => $r['title'], 'type' => $r['category_name'] ?: 'Property', 'categoryId' => $r['category_id'] ? (int) $r['category_id'] : null,
@@ -231,7 +232,7 @@ function crm_map_property(array $r, array $imgs, array $amen): array
         'ownerName' => (string) $r['owner_name'], 'ownerContact' => (string) $r['owner_contact'], 'sourceUrl' => (string) ($r['source_url'] ?? ''),
         'featured' => (bool) $r['is_featured'], 'luxury' => (bool) $r['is_luxury'], 'views' => (int) $r['views'],
         'listedAt' => crm_iso($r['created_at']), 'updatedAt' => crm_iso($r['updated_at']),
-        'images' => $images, 'amenities' => $amen, 'description' => (string) $r['description'],
+        'images' => $images, 'noPhotos' => $noPhotos, 'amenities' => $amen, 'description' => (string) $r['description'],
         'notes' => $c['notes'] ?? [], 'youtube' => (string) $r['youtube_url'],
     ];
 }

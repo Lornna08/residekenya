@@ -197,7 +197,7 @@ $endcap = function (string $key) use (&$blocks) {
     <div class="cat-grid">
       <?php foreach ($categories as $cat): ?>
         <a class="cat-tile reveal" href="<?= e(url('listings.php?category=' . eurl($cat['slug']))) ?>">
-          <?php $__tile = cat_tile_image($cat); ?><img src="<?= e(img_src($__tile, 640)) ?>" srcset="<?= e(img_srcset($__tile, [384, 640])) ?>" sizes="(max-width: 640px) 46vw, 300px" alt="<?= e($cat['name']) ?>" loading="lazy" decoding="async" width="400" height="533">
+          <?php $__tile = cat_tile_image($cat); ?><img src="<?= e(img_src($__tile, 640)) ?>" srcset="<?= e(ph_srcset($__tile, [384, 640]) ?: img_srcset($__tile, [384, 640])) ?>" sizes="(max-width: 640px) 46vw, 300px" alt="<?= e($cat['name']) ?>" loading="lazy" decoding="async" width="400" height="533">
           <div>
             <h3><?= e($cat['name']) ?></h3>
             <span><?= e($cat['description'] ?? 'View listings') ?></span>
@@ -236,7 +236,7 @@ $endcap = function (string $key) use (&$blocks) {
 <!-- LUXURY -->
 <?php $capture('luxury'); ?>
 <?php if ($luxury): ?>
-<section class="section" style="background:var(--ink);color:#fff">
+<section class="section band-dark">
   <div class="wrap">
     <div class="section-head">
       <div>
@@ -355,7 +355,7 @@ $endcap = function (string $key) use (&$blocks) {
 <?php $capture('cta'); ?>
 <section class="section wrap">
   <div class="cta-band reveal">
-    <img src="<?= e(img_src('assets/img/cta.jpg', 1200)) ?>" srcset="<?= e(img_srcset('assets/img/cta.jpg', [828, 1200, 1920])) ?>" sizes="100vw" alt="" loading="lazy" decoding="async" width="1600" height="700">
+    <?php $__cta = setting('cta_image', '') ?: ph_url('living', 1600); ?><img src="<?= e(img_src($__cta, 1200)) ?>" srcset="<?= e(ph_srcset($__cta, [828, 1200, 1600]) ?: img_srcset($__cta, [828, 1200, 1920])) ?>" sizes="100vw" alt="" loading="lazy" decoding="async" width="1600" height="700">
     <span class="eyebrow" style="color:var(--gold);justify-content:center"><?= e(hp_text('cta', 'eyebrow', 'Sell or rent with us')) ?></span>
     <h2><?= e(hp_text('cta', 'heading', 'Looking to sell or rent your property?')) ?></h2>
     <p>List with Reside Kenya and reach serious, ready buyers and tenants across Kenya. Professional presentation, honest advice, real results.</p>

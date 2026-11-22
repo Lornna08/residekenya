@@ -69,6 +69,7 @@ $counts = [
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_csrf();
+    begin_site_save();
 
     // Hero
     setting_save('hero_eyebrow', trim((string) input('hero_eyebrow', '')));
@@ -76,6 +77,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     setting_save('hero_sub', trim((string) input('hero_sub', '')));
 
     // Hero image upload
+    if (input('remove_hero_image')) setting_save('hero_image', '');
+    if (input('remove_cta_image')) setting_save('cta_image', '');
+    if (!empty($_FILES['cta_image']['name'])) {
+        $stored = save_upload($_FILES['cta_image'], 'properties', ALLOWED_IMAGE_EXT);
+        if ($stored) setting_save('cta_image', $stored);
+    }
     if (!empty($_FILES['hero_image']['name'])) {
         $stored = save_upload($_FILES['hero_image'], 'properties', ALLOWED_IMAGE_EXT);
         if ($stored) setting_save('hero_image', $stored);
@@ -141,11 +148,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('admin/homepage.php');
 }
 
-$pageTitle = 'Homepage Editor';
+$previewUrl = '/';
+$pageTitle = 'Homepage editor';
+$pageLead = 'Changes appear in the preview as you type — Save publishes them';
 $activeAdmin = 'homepage';
 include __DIR__ . '/templates/layout-head.php';
 ?>
-<form method="post" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data" data-preview>
   <?= csrf_field() ?>
   <input type="hidden" name="section_order" id="sectionOrder" value="<?= e(implode(',', array_keys($config))) ?>">
 
@@ -155,10 +164,22 @@ include __DIR__ . '/templates/layout-head.php';
       <div class="a-field"><label>Eyebrow (small text above heading)</label><input class="a-input" name="hero_eyebrow" value="<?= e($hero['eyebrow']) ?>"></div>
       <div class="a-field"><label>Heading</label><input class="a-input" name="hero_heading" value="<?= e($hero['heading']) ?>"></div>
       <div class="a-field"><label>Sub-text</label><textarea class="a-textarea" name="hero_sub" style="min-height:70px"><?= e($hero['sub']) ?></textarea></div>
-      <div class="a-field"><label>Hero background image</label><input class="a-input" type="file" name="hero_image" accept="image/*">
-        <?php if ($hi = setting('hero_image', '')): ?><div style="margin-top:.5rem"><img src="<?= e(asset_url($hi)) ?>" style="width:160px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--a-line)"></div><?php endif; ?>
-        <span class="muted" style="font-size:.76rem">Recommended 1920×1080. Leave empty to keep current.</span>
+      <?php $hi = setting('hero_image', ''); $ci = setting('cta_image', ''); ?>
+      <div class="a-grid">
+        <div class="a-field"><label>Hero background photo</label>
+          <div class="img-field"><img src="<?= e($hi ? asset_url($hi) : '/assets/img/hero.jpg') ?>" alt="" width="200" height="112">
+            <div><?php if (!$hi): ?><p class="ph-note"><?= a_icon('info', 14) ?><span>This is a <b>sample photo</b>. Upload your own (1920×1080 works best).</span></p><?php endif; ?>
+              <input type="file" name="hero_image" accept="image/jpeg,image/png,image/webp">
+              <?php if ($hi): ?><label class="a-check" style="margin-top:8px"><input type="checkbox" name="remove_hero_image" value="1"> Use the sample photo instead</label><?php endif; ?></div></div>
+        </div>
+        <div class="a-field"><label>“Sell or rent with us” banner photo</label>
+          <div class="img-field"><img src="<?= e($ci ? asset_url($ci) : ph_url('living', 400)) ?>" alt="" width="200" height="112">
+            <div><?php if (!$ci): ?><p class="ph-note"><?= a_icon('info', 14) ?><span>This is a <b>placeholder photo</b>. Upload your own to replace it.</span></p><?php endif; ?>
+              <input type="file" name="cta_image" accept="image/jpeg,image/png,image/webp">
+              <?php if ($ci): ?><label class="a-check" style="margin-top:8px"><input type="checkbox" name="remove_cta_image" value="1"> Remove this photo</label><?php endif; ?></div></div>
+        </div>
       </div>
+      <p class="ed-note" style="margin:4px 0 0"><?= a_icon('info', 15) ?><span>Property-type tiles without listings show placeholder photos until you add a photo for that type under <a href="/admin/categories">Property types</a>.</span></p>
     </div>
   </div>
 
@@ -276,10 +297,7 @@ include __DIR__ . '/templates/layout-head.php';
     </div>
   </div>
 
-  <div style="position:sticky;bottom:0;background:var(--a-bg);padding:1rem 0;border-top:1px solid var(--a-line)">
-    <button class="a-btn gold" type="submit">Save Homepage</button>
-    <a class="a-btn ghost" href="<?= e(url('/')) ?>" target="_blank" rel="noopener">View site →</a>
-  </div>
+  <div class="ed-save"><span class="muted" data-pv-state>Changes show in the preview — they go live when you save.</span><button class="a-btn gold" type="submit"><?= a_icon('check', 15) ?> Save &amp; publish</button></div>
 </form>
 
 <style>

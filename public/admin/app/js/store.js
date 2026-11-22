@@ -222,7 +222,7 @@
       } else {
         p = Object.assign({ id: nid('pnew'), ref: 'New', views: 0, listedAt: iso(), notes: [], images: [], amenities: [], estimate: null, floors: 1, agentId: ES.config.userId }, data);
         if (!p.estimate) p.estimate = p.price;
-        if (!p.images.length) p.images = ['/assets/img/placeholder.jpg'];
+        if (!p.images.length) { p.images = ['/assets/img/placeholder.jpg']; p.noPhotos = true; }
         S.properties.unshift(p);
         commit({ kind: 'listing', text: 'New listing created — ' + p.title, ref: { type: 'property', id: p.id } });
       }

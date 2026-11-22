@@ -8,8 +8,8 @@ $nav = [
   'Airbnb'     => 'listings.php?purpose=airbnb',
   'Commercial' => 'listings.php?purpose=commercial',
   'Land'       => 'listings.php?purpose=land',
-  'About'      => 'about.php',
-  'Contact'    => 'contact.php',
+  'About'      => 'about',
+  'Contact'    => 'contact',
 ];
 $activeNav = $activeNav ?? '';
 ?><!DOCTYPE html>

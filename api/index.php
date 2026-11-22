@@ -38,6 +38,12 @@ $__pretty = [
     '/commercial' => ['listings.php', ['purpose' => 'commercial']],
     '/land'       => ['listings.php', ['purpose' => 'land']],
     '/sitemap.xml'=> ['sitemap.php', []],
+    '/privacy'    => ['policy.php', ['p' => 'privacy']],
+    '/terms'      => ['policy.php', ['p' => 'terms']],
+    '/cookies'    => ['policy.php', ['p' => 'cookies']],
+    '/disclaimer' => ['policy.php', ['p' => 'disclaimer']],
+    '/about'      => ['about.php', []],
+    '/contact'    => ['contact.php', []],
 ];
 $__script = null;
 $__trim = rtrim($__path, '/');

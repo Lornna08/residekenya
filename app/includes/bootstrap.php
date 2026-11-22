@@ -16,6 +16,7 @@ require __DIR__ . '/Property.php';
 require __DIR__ . '/seo.php';
 require __DIR__ . '/push.php';
 require __DIR__ . '/crm.php';
+require __DIR__ . '/content.php';
 
 // Sessions start only when a page needs one (sign-in, forms, flash messages), or when
 // the visitor already has a session cookie. Public pages without one stay cookie-free,

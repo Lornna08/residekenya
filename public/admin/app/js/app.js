@@ -8,61 +8,74 @@
   ES.pages = {};
   ES.ui = { listings: { view: 'grid', q: '', type: '', cat: '', status: '', area: '', beds: '', agent: '', min: '', max: '', listed: '', sort: 'newest', page: 1 }, deals: { agent: '', kind: 'all', showLost: false }, leads: { q: '', status: '', source: '', agent: '', sort: 'recent' }, contacts: { q: '', type: '' }, cal: { view: 'month', cursor: null }, chat: { conv: 'cv1', open: true, drafts: {} }, period: 12 };
 
-  var PRIMARY = [
-    { id: 'overview', label: 'Overview', icon: 'home' },
-    { id: 'listings', label: 'Properties', icon: 'building' },
-    { id: 'rentals', label: 'Rentals', icon: 'key' },
-    { id: 'sales', label: 'Sales', icon: 'tag' },
-    { id: 'deals', label: 'Deals', icon: 'board' },
-    { id: 'leads', label: 'Leads', icon: 'user', badge: function () { return st.newLeadCount(); } },
-    { id: 'contacts', label: 'Contacts', icon: 'users' }
-  ];
+  // Left menu: workspace pages, then the website pages (server pages with the same look).
   function wc(k) { var c = (st.s.website || {}).counts || {}; return c[k] || 0; }
-  var MORE = [
-    { id: 'rentals', sub: 'management', label: 'Property management', icon: 'wrench' },
-    { id: 'tasks', label: 'Tasks & follow-ups', icon: 'task', badge: function () { return st.overdueFollowups().length; } },
-    { id: 'calendar', label: 'Calendar', icon: 'cal' },
-    { id: 'team', label: 'Team', icon: 'users' },
-    { id: 'commissions', label: 'Commission reports', icon: 'wallet' },
-    { id: 'analytics', label: 'Analytics', icon: 'chart' },
-    { id: 'documents', label: 'Documents', icon: 'file' },
-    { id: 'settings', label: 'Settings', icon: 'gear' }
+  var NAV = [
+    { g: 'Workspace', items: [
+      { id: 'overview', label: 'Overview', icon: 'home' },
+      { id: 'listings', label: 'Properties', icon: 'building', sub: 'props' },
+      { id: 'rentals', label: 'Rentals', icon: 'key' },
+      { id: 'sales', label: 'Sales', icon: 'tag' },
+      { id: 'deals', label: 'Deals', icon: 'board' },
+      { id: 'leads', label: 'Leads', icon: 'user', badge: function () { return st.newLeadCount(); } },
+      { id: 'contacts', label: 'Contacts', icon: 'users' },
+      { id: 'tasks', label: 'Tasks & follow-ups', icon: 'task', badge: function () { return st.overdueFollowups().length; } },
+      { id: 'calendar', label: 'Calendar', icon: 'cal' },
+      { id: 'chat', label: 'Team chat', icon: 'chat', badge: function () { return st.unreadCount(); } }
+    ] },
+    { g: 'Team & reports', items: [
+      { id: 'team', label: 'Team', icon: 'users' },
+      { id: 'commissions', label: 'Commission reports', icon: 'wallet' },
+      { id: 'analytics', label: 'Analytics', icon: 'chart' },
+      { id: 'documents', label: 'Documents', icon: 'file' },
+      { id: 'settings', label: 'Settings', icon: 'gear' }
+    ] }
   ];
-  // Website management pages (server pages that share this look).
   var SITE = [
-    { href: '/admin/inquiries.php', label: 'Website inquiries', icon: 'mail', badge: function () { return wc('inquiries'); } },
-    { href: '/admin/bookings.php', label: 'Airbnb bookings', icon: 'cal', badge: function () { return wc('bookings'); } },
-    { href: '/admin/submissions.php', label: 'Property submissions', icon: 'upload', badge: function () { return wc('submissions'); } },
-    { href: '/admin/quick-listing.php', label: 'Quick listing', icon: 'plus' },
-    { href: '/admin/homepage.php', label: 'Homepage editor', icon: 'home' },
-    { href: '/admin/settings.php', label: 'Website settings', icon: 'gear' },
-    { href: '/admin/locations.php', label: 'Locations', icon: 'pin' },
-    { href: '/admin/categories.php', label: 'Property types', icon: 'building' },
-    { href: '/admin/amenities.php', label: 'Amenities', icon: 'check' },
-    { href: '/admin/testimonials.php', label: 'Testimonials', icon: 'star' },
-    { href: '/admin/agents.php', label: 'Website agents', icon: 'users' },
-    { href: '/admin/subscribers.php', label: 'Subscribers', icon: 'mail' },
-    { href: '/admin/import-export.php', label: 'Import & export', icon: 'download' },
-    { href: '/admin/users.php', label: 'Users & access', icon: 'user' },
-    { href: '/admin/activity.php', label: 'Activity log', icon: 'clock' }
+    { href: '/admin/inquiries', label: 'Website inquiries', icon: 'mail', badge: function () { return wc('inquiries'); } },
+    { href: '/admin/bookings', label: 'Airbnb bookings', icon: 'cal', badge: function () { return wc('bookings'); } },
+    { href: '/admin/submissions', label: 'Property submissions', icon: 'upload', badge: function () { return wc('submissions'); } },
+    { href: '/admin/homepage', label: 'Homepage editor', icon: 'home' },
+    { href: '/admin/site-editor', label: 'Pages & policies', icon: 'file' },
+    { href: '/admin/site-editor?p=details', label: 'Contact & socials', icon: 'phone' },
+    { href: '/admin/quick-listing', label: 'Quick listing', icon: 'plus' },
+    { href: '/admin/settings', label: 'Website settings', icon: 'gear' },
+    { href: '/admin/locations', label: 'Locations', icon: 'pin' },
+    { href: '/admin/categories', label: 'Property types', icon: 'building' },
+    { href: '/admin/amenities', label: 'Amenities', icon: 'check' },
+    { href: '/admin/testimonials', label: 'Testimonials', icon: 'star' },
+    { href: '/admin/agents', label: 'Website agents', icon: 'users' },
+    { href: '/admin/subscribers', label: 'Subscribers', icon: 'mail' },
+    { href: '/admin/import-export', label: 'Import & export', icon: 'download' },
+    { href: '/admin/users', label: 'Users & access', icon: 'user' },
+    { href: '/admin/activity', label: 'Activity log', icon: 'clock' }
   ];
   ES.SITE_MENU = SITE;
   var TAB_OF = { property: 'listings', 'listing-new': 'listings', 'listing-edit': 'listings', deal: 'deals', contact: 'contacts', lead: 'leads' };
+  var LS = { get: function (k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { } } };
+  function navState() { try { return JSON.parse(LS.get('reside_nav', '{}')) || {}; } catch (e) { return {}; } }
+  function applyNavState() { var n = navState(); ['props', 'site'].forEach(function (g) { document.documentElement.classList.toggle('g-' + g + '-off', !!n[g]); }); }
+  ES.theme = function (t) {
+    t = t === 'dark' ? 'dark' : 'light'; document.documentElement.dataset.theme = t; LS.set('reside_admin_theme', t);
+    var m = document.querySelector('meta[name=theme-color]'); if (m) m.content = t === 'dark' ? '#0F1115' : '#EEF2F8';
+    document.querySelectorAll('[data-act=theme]').forEach(function (b) { b.classList.toggle('is-on', b.dataset.v === t); b.setAttribute('aria-pressed', b.dataset.v === t); });
+  };
 
   /* ---------------- shell ---------------- */
   function shell() {
     document.body.innerHTML =
       '<div class="app" id="app">' +
+      '<aside class="side" id="side" aria-label="Main menu"></aside><div class="side-scrim" data-act="navclose"></div>' +
       '<div class="main">' +
-      '<header class="top"><button class="ib top__menu" data-act="drawer" aria-label="Open navigation">' + I('menu', 20) + '</button>' +
-      '<a class="brand" href="#/overview" aria-label="Reside Kenya overview"><span class="brand__m"><img src="/assets/img/favicon-64.png" alt=""></span><span class="brand__w">Reside<em>Kenya</em></span></a>' +
+      '<header class="top"><button class="ib top__menu" data-act="drawer" aria-label="Open menu">' + I('menu', 20) + '</button>' +
+      '<a class="brand top__brand" href="#/overview" aria-label="Reside Kenya overview"><span class="brand__m"><img src="/assets/img/favicon-64.png" alt=""></span><span class="brand__w">Reside<em>Kenya</em></span></a>' +
+      '<span class="top__title" id="topTitle"></span>' +
       '<span class="top__save" id="saveState" aria-live="polite"></span><span class="top__sp"></span>' +
       '<button class="ib ib--round" data-act="search" aria-label="Search (Ctrl+K)">' + I('search', 18) + '</button>' +
       '<button class="ib ib--round" data-act="notes" aria-label="Notifications">' + I('bell', 18) + '<i class="ib__dot" id="noteDot" hidden></i></button>' +
-      '<a class="ib ib--round top__hide-s" href="/" target="_blank" rel="noopener" aria-label="View website" title="View website">' + I('globe', 18) + '</a>' + '<button class="ib ib--round top__hide-s" data-act="help" aria-label="Help">' + I('help', 18) + '</button>' +
-      '<button class="ib ib--round top__chat" data-act="chatm" aria-label="Team chat">' + I('chat', 18) + '<i class="ib__dot" id="chatDot" hidden></i></button>' +
+      '<a class="ib ib--round top__hide-s" href="/" target="_blank" rel="noopener" aria-label="View website" title="View website">' + I('globe', 18) + '</a>' +
+      '<button class="ib ib--round top__hide-s" data-act="themeflip" aria-label="Switch light or dark" title="Light / dark">' + I('moon', 18) + '</button>' +
       '<button class="me" data-act="me" aria-label="Your profile">' + ES.av(st.me(), 36) + '</button></header>' +
-      '<nav class="tabs" id="tabs" aria-label="Primary"></nav>' +
       '<main class="view" id="view" tabindex="-1"></main></div>' +
       '<aside class="chat" id="chat" aria-label="Team chat"></aside></div>' +
       '<button class="chat-fab" data-act="chatm" aria-label="Open team chat">' + I('chat', 22) + '<i id="fabDot" hidden></i></button>';
@@ -70,21 +83,44 @@
     document.addEventListener('keydown', function (e) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); }
       if (e.key === '/' && !/input|textarea|select/i.test(document.activeElement.tagName) && !document.querySelector('.ovl')) { e.preventDefault(); openSearch(); }
+      if (e.key === 'Escape') document.documentElement.classList.remove('is-nav');
     });
     window.addEventListener('resize', debounce(function () { var r = route(); if (r.redrawOnResize) render(); }, 200));
+    applyNavState(); ES.theme(LS.get('reside_admin_theme', 'light'));
   }
 
+  function badge(n) { return n ? '<i class="side__b">' + (n > 99 ? '99+' : n) + '</i>' : ''; }
+  function sideHTML() {
+    var cur = current.name, active = TAB_OF[cur] || cur, U = ES.ui.listings;
+    var h = '<div class="side__h"><a class="brand" href="#/overview" aria-label="Reside Kenya overview"><span class="brand__m"><img src="/assets/img/favicon-64.png" alt=""></span><span class="brand__w">Reside<em>Kenya</em></span></a>' +
+      '<button class="side__min" data-act="sidemin" aria-label="Collapse menu" title="Collapse menu">' + I('left', 16) + '</button><button class="side__x" data-act="navclose" aria-label="Close menu">' + I('x', 18) + '</button></div><nav class="side__nav">';
+    NAV.forEach(function (grp) {
+      h += '<div class="side__g">' + grp.g + '</div>';
+      grp.items.forEach(function (t) {
+        var on = active === t.id, b = t.badge ? t.badge() : 0;
+        var link = '<a href="#/' + t.id + '" class="side__a' + (on ? ' is-on' : '') + '" title="' + t.label + '"' + (on ? ' aria-current="page"' : '') + '>' + I(t.icon, 18) + '<span>' + t.label + '</span>' + badge(b) + '</a>';
+        if (t.sub) {
+          h += '<div class="side__grp" data-g="' + t.sub + '"><div class="side__row">' + link + '<button class="side__car" data-act="grp" data-g="' + t.sub + '" aria-label="Show or hide property types">' + I('down', 15) + '</button></div><div class="side__sub">' +
+            [['', 'All properties']].concat(ES.PURPOSES || []).map(function (o) { var son = cur === 'listings' && (U.cat || '') === o[0]; return '<a href="#/listings' + (o[0] ? '/' + o[0] : '/all') + '" class="' + (son ? 'is-on' : '') + '">' + o[1] + '</a>'; }).join('') +
+            '<a href="#/listings/new" class="side__new">' + I('plus', 13) + 'New listing</a></div></div>';
+        } else h += link;
+      });
+    });
+    h += '<button class="side__g side__g--btn" data-act="grp" data-g="site">Website' + badge(SITE.reduce(function (a, m) { return a + (m.badge ? m.badge() : 0); }, 0)) + I('down', 14) + '</button><div class="side__gb" data-gb="site">' +
+      SITE.map(function (t) { var b = t.badge ? t.badge() : 0; return '<a href="' + t.href + '" class="side__a" title="' + t.label + '">' + I(t.icon, 18) + '<span>' + t.label + '</span>' + badge(b) + '</a>'; }).join('') + '</div>';
+    h += '</nav><div class="side__f"><div class="side__thm" role="group" aria-label="Theme"><button data-act="theme" data-v="light" title="Light">' + I('sun', 15) + '<span>Light</span></button><button data-act="theme" data-v="dark" title="Dark">' + I('moon', 15) + '<span>Dark</span></button></div>' +
+      '<a class="side__a" href="/" target="_blank" rel="noopener" title="View website">' + I('globe', 18) + '<span>View website</span></a><a class="side__a" href="/admin/logout" title="Sign out">' + I('out', 18) + '<span>Sign out</span></a></div>';
+    return h;
+  }
   function tabs() {
-    var cur = current.name, active = TAB_OF[cur] || cur, inMore = MORE.some(function (m) { return m.id === active && !PRIMARY.some(function (p) { return p.id === active; }); });
-    var html = PRIMARY.map(function (t) {
-      var b = t.badge ? t.badge() : 0;
-      return '<a href="#/' + t.id + '" class="tab' + (active === t.id ? ' is-on' : '') + '"' + (active === t.id ? ' aria-current="page"' : '') + '>' + t.label + (b ? '<i class="tab__b">' + b + '</i>' : '') + '</a>';
-    }).join('');
-    var mb = MORE.concat(SITE).reduce(function (a, m) { return a + (m.badge ? m.badge() : 0); }, 0);
-    html += '<button class="tab tab--more' + (inMore ? ' is-on' : '') + '" data-act="more" aria-haspopup="menu">' + (inMore ? MORE.filter(function (m) { return m.id === active; })[0].label : 'More') + (mb ? '<i class="tab__b tab__b--r">' + mb + '</i>' : '') + I('down', 14) + '</button>';
-    document.getElementById('tabs').innerHTML = html;
+    var side = document.getElementById('side'), y = side.querySelector('.side__nav') ? side.querySelector('.side__nav').scrollTop : 0;
+    side.innerHTML = sideHTML(); var nv = side.querySelector('.side__nav'); if (nv) nv.scrollTop = y;
+    ES.theme(document.documentElement.dataset.theme);
     var nd = document.getElementById('noteDot'); if (nd) nd.hidden = !st.s.notifications.some(function (n) { return !n.read; });
-    var un = st.unreadCount(); ['chatDot', 'fabDot'].forEach(function (id) { var e = document.getElementById(id); if (e) { e.hidden = !un; e.textContent = id === 'fabDot' ? un : ''; } });
+    var un = st.unreadCount(), fd = document.getElementById('fabDot'); if (fd) { fd.hidden = !un; fd.textContent = un; }
+    var tt = document.getElementById('topTitle'), lab = '';
+    NAV.forEach(function (g) { g.items.forEach(function (t) { if (t.id === (TAB_OF[current.name] || current.name)) lab = t.label; }); });
+    if (tt) tt.textContent = lab;
   }
 
   /* ---------------- router ---------------- */
@@ -127,27 +163,22 @@
   ES.app = { go: function (h) { if (location.hash === h) go(); else location.hash = h; }, refresh: function () { render(true); }, current: function () { return current; } };
 
   /* ---------------- clicks ---------------- */
+  function setChat(open) { ES.ui.chat.open = open; document.documentElement.classList.toggle('is-chat-off', !open); LS.set('reside_chat_open', open ? '1' : '0'); }
   function onClick(e) {
+    if (e.target.closest('.side a')) document.documentElement.classList.remove('is-nav');
     var a = e.target.closest('[data-act]'); if (!a) return;
     var act = a.dataset.act;
     if (act === 'search') openSearch();
     else if (act === 'notes') openNotes(a);
     else if (act === 'help') openHelp();
     else if (act === 'me') ES.menu(a, [{ label: st.me().name + ' — ' + st.me().role, icon: 'user', disabled: true }, '-', { label: 'My profile & photo', icon: 'image', k: 'profile' }, { label: 'Phone notifications', icon: 'bell', k: 'push' }, { label: 'Settings', icon: 'gear', go: '#/settings' }, { label: 'Team', icon: 'users', go: '#/team' }, '-', { label: 'View website', icon: 'out', href: '/' }, { label: 'Sign out', icon: 'x', href: '/admin/logout' }], function (it) { if (it.go) ES.app.go(it.go); else if (it.href) { if (it.href === '/') window.open('/', '_blank'); else location.href = it.href; } else if (it.k === 'profile') ES.profile(); else if (it.k === 'push') ES.pushSettings(); });
-    else if (act === 'more') ES.menu(a, [{ label: 'Properties', disabled: true, icon: 'building' }].concat((ES.PURPOSES || []).map(function (o) { return { label: '   ' + o[1], icon: 'right', go: '#/listings/' + o[0] }; }), ['-']).concat(MORE.map(function (m) { var b = m.badge ? m.badge() : 0; return { label: m.label + (b ? ' (' + b + ')' : ''), icon: m.icon, go: '#/' + m.id + (m.sub ? '/' + m.sub : '') }; })).concat(['-', { label: 'Website', disabled: true, icon: 'out' }]).concat(SITE.map(function (m) { var b = m.badge ? m.badge() : 0; return { label: m.label + (b ? ' (' + b + ')' : ''), icon: m.icon, href: m.href }; })), function (it) { if (it.href) location.href = it.href; else ES.app.go(it.go); });
-    else if (act === 'drawer') openDrawerNav();
-    else if (act === 'chatm') { if (innerWidth > 1180) { ES.ui.chat.open = !ES.ui.chat.open; document.documentElement.classList.toggle('is-chat-off', !ES.ui.chat.open); } else ES.app.go('#/chat'); }
-  }
-
-  function openDrawerNav() {
-    var items = PRIMARY.concat(MORE.filter(function (m) { return !m.sub; }));
-    var p = ES.open('drawer', '<div class="dnav"><div class="dnav__h"><span class="brand"><span class="brand__m"><img src="/assets/img/favicon-64.png" alt=""></span><span class="brand__w">Reside<em>Kenya</em></span></span><button class="ib" data-close aria-label="Close">' + I('x', 18) + '</button></div>' +
-      items.map(function (t) { var on = (TAB_OF[current.name] || current.name) === t.id, b = t.badge ? t.badge() : 0; return '<a href="#/' + t.id + '" class="dnav__a' + (on ? ' is-on' : '') + '">' + I(t.icon, 18) + '<span>' + t.label + '</span>' + (b ? '<i>' + b + '</i>' : '') + '</a>' + (t.id === 'listings' ? '<div class="dnav__sub">' + (ES.PURPOSES || []).map(function (o) { return '<a href="#/listings/' + o[0] + '" class="' + (current.name === 'listings' && ES.ui.listings.cat === o[0] ? 'is-on' : '') + '">' + o[1] + '</a>'; }).join('') + '<a href="#/listings/new">+ New listing</a></div>' : ''); }).join('') +
-      '<a href="#/chat" class="dnav__a">' + I('chat', 18) + '<span>Team chat</span>' + (st.unreadCount() ? '<i>' + st.unreadCount() + '</i>' : '') + '</a>' +
-      '<div class="dnav__sep"></div><div class="dnav__g">Website</div>' +
-      SITE.map(function (t) { var b = t.badge ? t.badge() : 0; return '<a href="' + t.href + '" class="dnav__a">' + I(t.icon, 18) + '<span>' + t.label + '</span>' + (b ? '<i>' + b + '</i>' : '') + '</a>'; }).join('') +
-      '<div class="dnav__sep"></div><a href="/" target="_blank" class="dnav__a">' + I('out', 18) + '<span>View website</span></a><a href="/admin/logout" class="dnav__a dnav__home">' + I('x', 18) + '<span>Sign out</span></a></div>', { label: 'Navigation', cls: 'ovl--left' });
-    p.addEventListener('click', function (e) { if (e.target.closest('a')) ES.close(); });
+    else if (act === 'drawer') document.documentElement.classList.add('is-nav');
+    else if (act === 'navclose') document.documentElement.classList.remove('is-nav');
+    else if (act === 'sidemin') { var mn = !document.documentElement.classList.contains('is-side-min'); document.documentElement.classList.toggle('is-side-min', mn); LS.set('reside_side_min', mn ? '1' : '0'); a.title = mn ? 'Expand menu' : 'Collapse menu'; window.dispatchEvent(new Event('resize')); }
+    else if (act === 'grp') { if (document.documentElement.classList.contains('is-side-min') && innerWidth > 900) { document.documentElement.classList.remove('is-side-min'); LS.set('reside_side_min', '0'); } var n = navState(); n[a.dataset.g] = !n[a.dataset.g]; LS.set('reside_nav', JSON.stringify(n)); applyNavState(); }
+    else if (act === 'theme') ES.theme(a.dataset.v);
+    else if (act === 'themeflip') ES.theme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+    else if (act === 'chatm') { if (innerWidth > 1180) { setChat(!ES.ui.chat.open); if (ES.ui.chat.open) { renderChat(); ES.sync.refresh(); setTimeout(function () { var i = document.querySelector('.chat__f input'); if (i) i.focus(); }, 60); } } else ES.app.go('#/chat'); }
   }
 
   /* ---------------- search ---------------- */
@@ -248,7 +279,7 @@
       var b = e.target.closest('[data-chat]'); if (!b) return;
       var k = b.dataset.chat;
       if (k === 'conv') { ES.ui.chat.conv = b.dataset.id; st.markRead(b.dataset.id); refreshChat(); setTimeout(function () { var i = document.querySelector('.chat__f input'); if (i) i.focus(); }, 0); }
-      if (k === 'toggle') { ES.ui.chat.open = false; document.documentElement.classList.add('is-chat-off'); }
+      if (k === 'toggle') setChat(false);
       if (k === 'attach') {
         ES.menu(b, st.listings().slice(0, 30).map(function (p) { return { label: p.title, icon: 'building', id: p.id }; }), function (it) {
           var p = st.prop(it.id), ph = p.images.slice(0, 3); while (ph.length < 2) ph.push(ph[0]);
@@ -286,7 +317,7 @@
   ES.boot = function () {
     st.init(); shell();
     chatEvents(document.getElementById('chat')); chatEvents(document.getElementById('view'));
-    if (innerWidth <= 1180) ES.ui.chat.open = false;
+    if (innerWidth <= 1180) ES.ui.chat.open = false; else setChat(LS.get('reside_chat_open', '1') === '1');
     var pend = {}, flush = debounce(function () { var k = pend; pend = {}; var typing = document.activeElement && /input|textarea|select/i.test(document.activeElement.tagName) && document.getElementById('view').contains(document.activeElement); if ((k.data || (k.remote && !typing)) && !route().static) render(true); else tabs(); if (k.chat || k.data) { if (current.name === 'chat' && k.chat) refreshMobileChat(); renderChat(); } }, 30);
     st.subscribe(function (kind) { pend[kind || 'data'] = 1; flush(); });
     window.addEventListener('hashchange', go);
@@ -294,7 +325,19 @@
     go(); renderChat();
     // Live updates: website leads, teammates’ edits and chat.
     var chatOpen = function () { return current.name === 'chat' || (innerWidth > 1180 && ES.ui.chat.open); };
-    (function poll() { setTimeout(function () { if (document.visibilityState === 'visible') ES.sync.refresh().then(poll, poll); else poll(); }, chatOpen() ? 5000 : 15000); })();
+    (function poll() { setTimeout(function () { if (document.visibilityState === 'visible') ES.sync.refresh().then(poll, poll); else poll(); }, chatOpen() ? 4000 : 8000); })();
+    // A new chat message while the chat is closed: show it so nothing is missed.
+    var lastUnread = st.unreadCount();
+    st.subscribe(function (kind) {
+      if (kind !== 'chat') return;
+      var un = st.unreadCount();
+      if (un > lastUnread && !chatOpen()) {
+        var m = st.s.msgs.filter(function (x) { return x.from !== ES.config.userId; }).sort(function (a, b) { return new Date(b.at) - new Date(a.at); })[0];
+        if (m) ES.toast(st.user(m.from).name.split(' ')[0] + ': ' + (m.text || 'shared a listing').slice(0, 80), 'info');
+        var fab = document.querySelector('.chat-fab'); if (fab) { fab.classList.remove('is-ping'); void fab.offsetWidth; fab.classList.add('is-ping'); }
+      }
+      lastUnread = un;
+    });
     document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') ES.sync.refresh(); });
     var topEl = document.querySelector('.top'); addEventListener('scroll', function () { topEl.classList.toggle('is-stuck', scrollY > 4); }, { passive: true });
   };

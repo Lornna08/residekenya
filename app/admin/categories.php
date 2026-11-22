@@ -52,7 +52,7 @@ include __DIR__ . '/templates/layout-head.php';
         <tbody>
           <?php foreach ($rows as $r): ?>
             <tr>
-              <td><?php if (!empty($r['image'])): ?><img class="thumb" src="<?= e(asset_url($r['image'])) ?>" alt=""><?php else: ?><span class="muted" style="font-size:.7rem">—</span><?php endif; ?></td>
+              <td><?php if (!empty($r['image'])): ?><img class="thumb" src="<?= e(asset_url($r['image'])) ?>" alt=""><?php else: ?><span class="ph-thumb" title="Placeholder — upload a tile image to replace"><img class="thumb" src="<?= e(ph_url(ph_key_for($r['name'] . ' ' . $r['slug']), 200)) ?>" alt=""><em>Placeholder</em></span><?php endif; ?></td>
               <td><?= e($r['name']) ?></td>
               <td class="muted"><?= e($r['slug']) ?></td>
               <td class="muted"><?= (int) $r['uses'] ?></td>

@@ -91,7 +91,7 @@
         // recently added
         '<section class="ov-recent"><header class="ov-recent__h"><h2>' + I('building', 18) + 'Recently added properties</h2><a class="lnk" href="#/listings">All listings ' + I('right', 13) + '</a></header>' +
         (recent.length ? '<div class="lg lg--recent">' + recent.map(function (p) {
-          return '<a class="lc" href="#/property/' + p.id + '"><div class="lc__m"><img src="' + ES.img(p.images[0], 640) + '" alt="' + esc(p.title) + '" loading="lazy"><span class="lc__tag">' + ES.purposePill(p) + ES.statusPill(p.status) + '</span><span class="lc__ph">' + ES.av(st.user(p.agentId), 28) + '</span></div>' +
+          return '<a class="lc" href="#/property/' + p.id + '"><div class="lc__m"><img src="' + ES.img(p.images[0], 640) + '" alt="' + esc(p.title) + '" loading="lazy"><span class="lc__tag">' + ES.purposePill(p) + ES.statusPill(p.status) + (p.noPhotos ? ES.pill('Sample photo', 'amber') : '') + '</span><span class="lc__ph">' + ES.av(st.user(p.agentId), 28) + '</span></div>' +
             '<div class="lc__b"><span class="lc__t">' + esc(p.title) + '</span><span class="lc__l">' + I('pin', 12) + esc(p.area || p.city || '—') + ' · ' + esc(p.type) + '</span><span class="lc__p">' + ES.priceLabel(p) + '</span>' +
             '<span class="lc__f"><span>' + esc(p.ref) + '</span><span>Added ' + f.ago(p.listedAt) + '</span></span></div></a>';
         }).join('') + '</div>' : ES.empty('building', 'No properties yet', '')) + '</section>';

@@ -7,46 +7,17 @@ $defs = [
     'General' => [
         'site_name' => 'Site name',
         'site_tagline' => 'Tagline',
-        'default_theme' => 'Default theme (light, dark, blue, or earth)',
-        'contact_email' => 'Contact email',
-        'contact_phone' => 'Contact phone',
-        'whatsapp_number' => 'WhatsApp number (digits only)',
-        'office_address' => 'Office address',
-    ],
-    'Social' => [
-        'instagram' => 'Instagram handle (no @)',
-        'tiktok' => 'TikTok handle (no @)',
-        'facebook' => 'Facebook URL',
-        'twitter' => 'X / Twitter handle',
+        'default_theme' => 'Default website theme',
     ],
     'SEO defaults' => [
         'meta_description' => 'Default meta description',
         'meta_keywords' => 'Default keywords',
     ],
-    'Email (SMTP — used if you wire PHPMailer)' => [
-        'smtp_from' => 'From email',
-        'smtp_host' => 'SMTP host',
-        'smtp_port' => 'SMTP port',
-        'smtp_user' => 'SMTP username',
-        'smtp_pass' => 'SMTP password',
-    ],
-    'About page stats' => [
-        'about_stat1_value' => 'Stat 1 value (e.g. 300+)',
-        'about_stat1_label' => 'Stat 1 label',
-        'about_stat2_value' => 'Stat 2 value (e.g. 20+)',
-        'about_stat2_label' => 'Stat 2 label',
-        'about_stat3_value' => 'Stat 3 value (e.g. 20+)',
-        'about_stat3_label' => 'Stat 3 label',
-        'about_stat4_value' => 'Stat 4 value (e.g. 100%)',
-        'about_stat4_label' => 'Stat 4 label',
-    ],
-    'Maps & embeds' => [
-        'office_map_embed' => 'Contact page map embed (full <iframe> HTML)',
-    ],
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_csrf();
+    begin_site_save();
     foreach ($defs as $group) {
         foreach ($group as $key => $_label) {
             if (array_key_exists($key, $_POST)) {
@@ -59,11 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('admin/settings.php');
 }
 
-$pageTitle = 'Settings & SEO';
+$previewUrl = '/';
+$pageTitle = 'Website settings';
+$pageLead = 'Name, tagline, default theme and search-engine text';
 $activeAdmin = 'settings';
 include __DIR__ . '/templates/layout-head.php';
 ?>
-<form method="post">
+<div class="ed-note"><?= a_icon('info', 15) ?><span>Phone, email, WhatsApp, address and social links are in <a href="/admin/site-editor?p=details">Contact &amp; socials</a>. Page text and policies are in <a href="/admin/site-editor">Pages &amp; policies</a>.</span></div>
+<form method="post" data-preview>
   <?= csrf_field() ?>
   <?php foreach ($defs as $group => $fields): ?>
     <div class="panel">
@@ -75,8 +49,11 @@ include __DIR__ . '/templates/layout-head.php';
           $isSecret = $key === 'smtp_pass';
         ?>
           <div class="a-field">
-            <label><?= e($label) ?> <span class="muted" style="font-size:.72rem">(<?= e($key) ?>)</span></label>
-            <?php if ($isLong): ?>
+            <label><?= e($label) ?></label>
+            <?php if ($key === 'default_theme'): ?>
+              <select class="a-select" name="default_theme"><?php foreach (['dark' => 'Luxury dark', 'light' => 'Light premium', 'blue' => 'Professional blue', 'earth' => 'Earth & nature'] as $tk => $tl): ?><option value="<?= $tk ?>"<?= ($val ?: 'dark') === $tk ? ' selected' : '' ?>><?= e($tl) ?></option><?php endforeach; ?></select>
+              <small class="muted">Visitors can still switch theme; this is what they see first.</small>
+            <?php elseif ($isLong): ?>
               <textarea class="a-textarea" name="<?= e($key) ?>" style="min-height:70px"><?= e($val) ?></textarea>
             <?php else: ?>
               <input class="a-input" type="<?= $isSecret ? 'password' : 'text' ?>" name="<?= e($key) ?>" value="<?= e($val) ?>" <?= $isSecret ? 'autocomplete="new-password"' : '' ?>>
@@ -86,8 +63,6 @@ include __DIR__ . '/templates/layout-head.php';
       </div>
     </div>
   <?php endforeach; ?>
-  <div style="position:sticky;bottom:0;background:var(--a-bg);padding:1rem 0;border-top:1px solid var(--a-line)">
-    <button class="a-btn gold" type="submit">Save Settings</button>
-  </div>
+  <div class="ed-save"><span class="muted" data-pv-state>Changes show in the preview — they go live when you save.</span><button class="a-btn gold" type="submit"><?= a_icon('check', 15) ?> Save &amp; publish</button></div>
 </form>
 <?php include __DIR__ . '/templates/layout-foot.php'; ?>
