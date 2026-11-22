@@ -58,4 +58,4 @@ if (APP_ENV === 'production') {
     ini_set('display_errors', '1');
 }
 date_default_timezone_set('Africa/Nairobi');
-define('ASSET_V', '20261122f');
+define('ASSET_V', '20261122g');
