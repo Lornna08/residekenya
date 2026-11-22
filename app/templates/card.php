@@ -37,7 +37,7 @@ function render_card(array $p): void
     <article class="card reveal">
       <div class="card__media">
         <a href="<?= e($href) ?>" aria-label="<?= e($p['title']) ?>">
-          <img src="<?= e($img) ?>" alt="<?= e($p['title']) ?>" loading="lazy" width="640" height="480">
+          <img src="<?= e(img_src($p['featured_image'] ?? null, 640)) ?>" srcset="<?= e(img_srcset($p['featured_image'] ?? null, [384, 640, 828])) ?>" sizes="(max-width: 640px) 92vw, (max-width: 1100px) 46vw, 380px" alt="<?= e($p['title']) ?>" loading="lazy" decoding="async" width="640" height="480">
         </a>
         <div class="card__badges">
           <?php if (!empty($p['is_featured'])): ?><span class="badge badge--featured">Featured</span><?php endif; ?>

@@ -33,7 +33,7 @@ $pageTitle = ($titleBits ? implode(' ', $titleBits) . ' — ' : '') . 'Propertie
 
 $seo = [
   'title' => $pageTitle . ' | ' . setting('site_name', SITE_NAME),
-  'description' => 'Browse ' . strtolower($pageTitle) . ' on Reside Ke. Filter by county, type, price and more.',
+  'description' => 'Browse ' . strtolower($pageTitle) . ' on Reside Kenya. Filter by county, type, price and more.',
 ];
 $activeNav = match($filters['purpose']) {
   'sale' => 'Buy', 'rent' => 'Rent', 'airbnb' => 'Airbnb',
@@ -59,6 +59,7 @@ function qs_page(int $p): string {
 <section class="wrap section--tight" style="padding-top:1rem;display:grid;grid-template-columns:280px 1fr;gap:2.4rem;align-items:start">
   <!-- FILTERS -->
   <aside class="filters" style="position:sticky;top:96px;border:1px solid var(--line);border-radius:var(--r);padding:1.5rem">
+    <button type="button" class="filters-toggle" onclick="this.parentNode.classList.toggle('open')" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filters &amp; search<span><?= number_format($result['total']) ?> found</span></button>
     <form method="get" action="<?= e(url('listings.php')) ?>">
       <h3 style="font-family:var(--body);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:1rem">Refine</h3>
 
@@ -139,7 +140,7 @@ function qs_page(int $p): string {
           <input type="hidden" name="<?= e($k) ?>" value="<?= e(is_array($v)?'':$v) ?>">
         <?php endforeach; ?>
         <label for="sort" style="font-size:.82rem;color:var(--slate)">Sort</label>
-        <select id="sort" name="sort" onchange="this.form.submit()" style="border:1px solid var(--line);border-radius:8px;padding:.5em .8em">
+        <select id="sort" name="sort" onchange="this.form.submit()" class="sort-select">
           <option value="">Featured</option>
           <option value="newest"     <?= $filters['sort']==='newest'?'selected':'' ?>>Newest</option>
           <option value="price_asc"  <?= $filters['sort']==='price_asc'?'selected':'' ?>>Price: Low to High</option>

@@ -5,7 +5,7 @@
 
 function auth_attempt(string $email, string $password): bool
 {
-    if (!rate_limit('login', 8, 900)) { // 8 tries / 15 min
+    if (rate_blocked('login', 8, 900)) { // 8 wrong passwords / 15 min
         flash('error', 'Too many attempts. Please wait 15 minutes and try again.');
         return false;
     }
@@ -14,6 +14,7 @@ function auth_attempt(string $email, string $password): bool
         [strtolower(trim($email))]
     );
     if (!$user || !password_verify($password, $user['password_hash'])) {
+        rate_limit('login', 8, 900); // only wrong passwords count toward the lock-out
         return false;
     }
     // Rehash if algorithm/cost changed.
@@ -62,7 +63,7 @@ function require_login(): void
 {
     if (!is_logged_in()) {
         flash('error', 'Please sign in to continue.');
-        redirect('admin/login.php');
+        redirect('admin/login');
     }
 }
 

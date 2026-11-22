@@ -4,7 +4,7 @@ require __DIR__ . '/includes/bootstrap.php';
 
 $seo = [
     'title'       => 'Contact Us — ' . SITE_NAME,
-    'description' => 'Get in touch with Reside Ke. Speak to our property consultants about buying, renting, Airbnb stays, or listing your property across Kenya.',
+    'description' => 'Get in touch with Reside Kenya. Speak to our property consultants about buying, renting, Airbnb stays, or listing your property across Kenya.',
     'canonical'   => url('contact.php'),
 ];
 $activeNav = 'Contact';

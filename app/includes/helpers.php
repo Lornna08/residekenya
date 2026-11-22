@@ -1,6 +1,6 @@
 <?php
 /**
- * Reside Ke — shared helpers.
+ * Reside Kenya — shared helpers.
  * Security-focused: escaping, CSRF, prepared-statement wrappers, safe uploads.
  */
 
@@ -55,6 +55,11 @@ function csrf_token(): string
 
 function csrf_field(): string
 {
+    // Public pages for visitors without a session: no cookie, no token (the form
+    // handlers accept same-site posts; see csrf_verify()). Keeps pages cacheable.
+    if (session_status() !== PHP_SESSION_ACTIVE && empty($_COOKIE[SESSION_NAME]) && !str_starts_with((string) ($_SERVER['SCRIPT_NAME'] ?? ''), '/admin/')) {
+        return '<input type="hidden" name="' . CSRF_TOKEN_NAME . '" value="">';
+    }
     return '<input type="hidden" name="' . CSRF_TOKEN_NAME . '" value="' . e(csrf_token()) . '">';
 }
 
@@ -63,15 +68,38 @@ function csrf_verify(): bool
     boot_session();
     $sent = $_POST[CSRF_TOKEN_NAME] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
     $stored = $_SESSION[CSRF_TOKEN_NAME] ?? '';
-    return $sent !== '' && $stored !== '' && hash_equals($stored, $sent);
+    if ($sent !== '' && $stored !== '' && hash_equals($stored, $sent)) return true;
+    // The session cookie is SameSite=Lax, so a cross-site form post never carries it.
+    // A post whose Origin (or Referer) is this same site is therefore genuine even if the
+    // token went stale (an old tab, a new session after sign-in, a second device).
+    return same_origin_request();
+}
+
+/** True when the browser says this request came from a page on this site. */
+function same_origin_request(): bool
+{
+    $host = strtolower(preg_replace('/:\d+$/', '', (string) ($_SERVER['HTTP_HOST'] ?? '')));
+    if ($host === '') return false;
+    $src = (string) ($_SERVER['HTTP_ORIGIN'] ?? '');
+    if ($src === '' || $src === 'null') $src = (string) ($_SERVER['HTTP_REFERER'] ?? '');
+    if ($src === '') return false;
+    $h = strtolower((string) parse_url($src, PHP_URL_HOST));
+    $strip = fn($x) => preg_replace('/^www\./', '', $x);
+    return $h !== '' && $strip($h) === $strip($host);
 }
 
 /** Abort with 419 if CSRF invalid (for POST handlers). */
 function require_csrf(): void
 {
     if (!csrf_verify()) {
-        http_response_code(419);
-        exit('Session expired. Please refresh the page and try again.');
+        if (!empty($_SERVER['HTTP_X_CSRF_TOKEN']) || str_contains((string) ($_SERVER['HTTP_ACCEPT'] ?? ''), 'json')) {
+            http_response_code(419); header('Content-Type: application/json');
+            exit(json_encode(['ok' => false, 'error' => 'Your session refreshed — please try again.']));
+        }
+        flash('error', 'That form had expired, so nothing was saved. Please try again.');
+        $back = (string) ($_SERVER['REQUEST_URI'] ?? '/');
+        header('Location: ' . $back, true, 303);
+        exit;
     }
 }
 
@@ -173,6 +201,40 @@ function url(string $path = ''): string
 }
 
 /** Public URL for an uploaded/stored asset path. */
+/**
+ * A resized, compressed (WebP) copy of an uploaded or bundled image, served from
+ * Vercel's image CDN. Falls back to the original file when running locally.
+ */
+const IMG_WIDTHS = [256, 384, 640, 828, 1080, 1200, 1920];
+function img_src(?string $path, int $w = 828): string
+{
+    $u = asset_url($path);
+    if (getenv('VERCEL') !== '1' || str_ends_with(strtolower(parse_url($u, PHP_URL_PATH) ?? ''), '.svg')) return $u;
+    $base = rtrim(BASE_URL, '/');
+    if (str_starts_with($u, $base . '/')) $u = substr($u, strlen($base));
+    elseif (!preg_match('#^https://[a-z0-9]+\.public\.blob\.vercel-storage\.com/uploads/#', $u)) return $u;
+    if (!preg_match('#^(/(uploads|assets)/|https://)#', $u)) return $u;
+    foreach (IMG_WIDTHS as $s) if ($s >= $w) { $w = $s; break; }
+    if ($w > 1920) $w = 1920;
+    return '/_vercel/image?url=' . rawurlencode($u) . '&w=' . $w . '&q=70';
+}
+
+/** Picture for a property-type tile: chosen image, else a bundled one, else a listing photo. */
+function cat_tile_image(array $cat): string
+{
+    if (!empty($cat['tile_image'])) return (string) $cat['tile_image'];
+    $bundled = ['airbnb', 'apartments', 'commercial', 'holiday-homes', 'land', 'maisonettes', 'townhouses', 'villas'];
+    if (in_array($cat['slug'] ?? '', $bundled, true)) return 'assets/img/cat/' . $cat['slug'] . '.jpg';
+    return 'assets/img/placeholder.jpg';
+}
+
+/** srcset for responsive images: img_srcset($path, [384, 640, 1080]). */
+function img_srcset(?string $path, array $widths): string
+{
+    if (getenv('VERCEL') !== '1') return '';
+    return implode(', ', array_map(fn($w) => img_src($path, $w) . ' ' . $w . 'w', $widths));
+}
+
 function asset_url(?string $path): string
 {
     if (!$path) return url('assets/img/placeholder.jpg');
@@ -185,6 +247,8 @@ function asset_url(?string $path): string
  * ------------------------------------------------------------------ */
 function flash(string $key, ?string $msg = null)
 {
+    // Reading a message needs no new session: a visitor without one has none waiting.
+    if ($msg === null && session_status() !== PHP_SESSION_ACTIVE && empty($_COOKIE[SESSION_NAME])) return null;
     boot_session();
     if ($msg !== null) { $_SESSION['_flash'][$key] = $msg; return null; }
     $v = $_SESSION['_flash'][$key] ?? null;
@@ -204,6 +268,14 @@ function redirect(string $to): void
 /* ------------------------------------------------------------------ *
  *  Rate limiting (DB-backed sliding window)
  * ------------------------------------------------------------------ */
+/** True when this visitor has already used up the allowance (does not count a hit). */
+function rate_blocked(string $bucketKey, int $max, int $windowSeconds): bool
+{
+    $row = Database::row("SELECT hits FROM rate_limits WHERE bucket = ? AND window_start >= ? ORDER BY id DESC LIMIT 1",
+        [$bucketKey . ':' . client_ip(), date('Y-m-d H:i:s', time() - $windowSeconds)]);
+    return $row && (int) $row['hits'] >= $max;
+}
+
 function rate_limit(string $bucketKey, int $max, int $windowSeconds): bool
 {
     $ip = client_ip();
@@ -259,8 +331,14 @@ function save_upload(array $file, string $subdir, array $allowedExt): ?string
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $mime  = $finfo->file($file['tmp_name']);
     $okMimes = [
-        'image/jpeg','image/png','image/webp','image/gif','application/pdf'
+        'image/jpeg','image/png','image/webp','image/gif','application/pdf',
+        'application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/zip','application/x-zip-compressed','application/octet-stream',
     ];
+    // Generic binary types are only accepted for office/zip files, never as images.
+    if ($mime === 'application/octet-stream' && !in_array($ext, ['doc','docx','xls','xlsx','zip'], true)) return null;
+    if (str_starts_with($mime, 'image/') === false && in_array($ext, ALLOWED_IMAGE_EXT, true)) return null;
     if (!in_array($mime, $okMimes, true)) return null;
 
     $name = bin2hex(random_bytes(16)) . '.' . $ext;

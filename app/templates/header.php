@@ -2,6 +2,7 @@
 /** Header partial. Set $seo before include for meta. */
 $seo = $seo ?? [];
 $nav = [
+  'Home'       => '/',
   'Buy'        => 'listings.php?purpose=sale',
   'Rent'       => 'listings.php?purpose=rent',
   'Airbnb'     => 'listings.php?purpose=airbnb',
@@ -16,19 +17,19 @@ $activeNav = $activeNav ?? '';
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#1f4d3a">
+<meta name="theme-color" content="#0f1115">
 <?= seo_head($seo) ?>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="<?= e(url('assets/css/main.css')) ?>">
+<link rel="stylesheet" href="<?= e(url('assets/css/main.css')) ?>?v=<?= ASSET_V ?>">
 <link rel="icon" href="<?= e(url('favicon.ico')) ?>" sizes="48x48">
 <link rel="icon" href="<?= e(url('assets/img/favicon-32.png')) ?>" sizes="32x32" type="image/png">
 <link rel="icon" href="<?= e(url('assets/img/favicon-192.png')) ?>" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="<?= e(url('assets/img/favicon-180.png')) ?>">
 <link rel="manifest" href="<?= e(url('site.webmanifest')) ?>">
 <script>window.RESIDE_BASE = <?= json_encode(rtrim(BASE_URL, '/')) ?>;</script>
-<script>(function(){try{var d=<?= json_encode(setting('default_theme', 'light')) ?>;var t=localStorage.getItem('reside_theme')||d;if(t&&t!=='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<script>(function(){try{var d=<?= json_encode(setting('default_theme', 'dark')) ?>;var t=localStorage.getItem('reside_theme')||d;if(t&&t!=='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
 <?= $extraHead ?? '' ?>
 <noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
 </head>
@@ -36,8 +37,8 @@ $activeNav = $activeNav ?? '';
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header" id="siteHeader">
   <div class="wrap nav">
-    <a class="brand" href="<?= e(url('/')) ?>" aria-label="Reside Ke home">
-      Reside<b>&nbsp;Ke</b><small>Kenya</small>
+    <a class="brand" href="<?= e(url('/')) ?>" aria-label="Reside Kenya home">
+      <img class="brand-mark" src="/assets/img/mark.png" alt="" width="37" height="40"><span class="brand-word">Reside <b>Kenya</b></span>
     </a>
     <nav class="nav-links" aria-label="Primary">
       <?php foreach ($nav as $label => $href): ?>

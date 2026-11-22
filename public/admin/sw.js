@@ -1,9 +1,9 @@
-/* Reside Ke Admin — service worker: push notifications + offline fallback. */
-const VERSION = 'reside-admin-v1';
+/* Reside Kenya Admin — service worker: push notifications + offline fallback. */
+const VERSION = 'reside-admin-v2';
 const OFFLINE_URL = '/admin/offline.html';
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll([OFFLINE_URL, '/admin/assets/admin.css', '/admin/icons/admin-192.png'])));
+  e.waitUntil(caches.open(VERSION).then((c) => c.addAll([OFFLINE_URL, '/admin/icons/admin-192.png'])));
   self.skipWaiting();
 });
 
@@ -20,8 +20,8 @@ self.addEventListener('fetch', (e) => {
 
 self.addEventListener('push', (e) => {
   let d = {};
-  try { d = e.data ? e.data.json() : {}; } catch (_) { d = { title: 'Reside Ke', body: e.data && e.data.text() }; }
-  const title = d.title || 'Reside Ke';
+  try { d = e.data ? e.data.json() : {}; } catch (_) { d = { title: 'Reside Kenya', body: e.data && e.data.text() }; }
+  const title = d.title || 'Reside Kenya';
   const opts = {
     body: d.body || '',
     icon: '/admin/icons/admin-192.png',
@@ -29,7 +29,7 @@ self.addEventListener('push', (e) => {
     tag: d.tag || 'reside',
     renotify: true,
     requireInteraction: true,
-    data: { url: d.url || '/admin/index.php' },
+    data: { url: d.url || '/admin/' },
   };
   const jobs = [self.registration.showNotification(title, opts)];
   if (typeof d.badge === 'number' && self.navigator && 'setAppBadge' in self.navigator) {
@@ -40,7 +40,7 @@ self.addEventListener('push', (e) => {
 
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
-  const url = new URL((e.notification.data && e.notification.data.url) || '/admin/index.php', self.location.origin).href;
+  const url = new URL((e.notification.data && e.notification.data.url) || '/admin/', self.location.origin).href;
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
       for (const w of wins) {

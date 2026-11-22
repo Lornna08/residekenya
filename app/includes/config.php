@@ -9,7 +9,7 @@
 define('DATABASE_URL', getenv('DATABASE_URL') ?: (getenv('POSTGRES_URL') ?: 'postgres://postgres@localhost:5432/reside'));
 
 // ---- Site ----
-define('SITE_NAME', 'Reside Ke');
+define('SITE_NAME', 'Reside Kenya');
 
 // Base URL with NO trailing slash. Follows the host the site is served on
 // (residekenya.com in production, *.vercel.app for previews).
@@ -58,3 +58,4 @@ if (APP_ENV === 'production') {
     ini_set('display_errors', '1');
 }
 date_default_timezone_set('Africa/Nairobi');
+define('ASSET_V', '20261122b');

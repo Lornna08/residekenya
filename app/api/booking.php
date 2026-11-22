@@ -88,10 +88,11 @@ $summary = '<table cellpadding="6" style="font-family:Arial,sans-serif;font-size
     . '</table>';
 
 // Notify admin
+crm_capture('booking', $bookingId);
 notify_admins(
     '🏡 Booking request — ' . $name,
     $property['title'] . "\n" . date('d M', $ciTs) . ' – ' . date('d M', $coTs) . ' · ' . $nights . ' night' . ($nights == 1 ? '' : 's') . ' · ' . $guests . ' guest' . ($guests == 1 ? '' : 's') . ' · ' . ($phone ?: $email),
-    'admin/bookings.php', 'booking-' . $bookingId
+    'admin/#/leads?lead=ldb' . $bookingId, 'booking-' . $bookingId
 );
 send_mail(setting('contact_email', ADMIN_EMAIL), 'New booking request — ' . SITE_NAME,
     '<h2 style="font-family:Georgia,serif;color:#16150f">New Airbnb booking request</h2>' . $summary);

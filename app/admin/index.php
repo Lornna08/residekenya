@@ -1,109 +1,53 @@
 <?php
-/** admin/index.php — dashboard */
+/**
+ * admin/index.php — the Reside Kenya workspace.
+ * Serves the single-page app (overview, properties, deals, leads, contacts,
+ * tasks, calendar, team, commissions, analytics, documents, chat) with the
+ * whole live state embedded, so the first screen paints without a round trip.
+ */
 require __DIR__ . '/../includes/bootstrap.php';
 require_login();
+crm_schema();
 
-$stats = [
-    'properties' => (int) (Database::row("SELECT COUNT(*) n FROM properties")['n'] ?? 0),
-    'available'  => (int) (Database::row("SELECT COUNT(*) n FROM properties WHERE status='available'")['n'] ?? 0),
-    'featured'   => (int) (Database::row("SELECT COUNT(*) n FROM properties WHERE is_featured=1")['n'] ?? 0),
-    'inquiries'  => (int) (Database::row("SELECT COUNT(*) n FROM inquiries WHERE is_read=0")['n'] ?? 0),
-    'bookings'   => (int) (Database::row("SELECT COUNT(*) n FROM bookings WHERE status='pending'")['n'] ?? 0),
-    'submissions'=> (int) (Database::row("SELECT COUNT(*) n FROM submissions WHERE status='new'")['n'] ?? 0),
-    'subscribers'=> (int) (Database::row("SELECT COUNT(*) n FROM subscribers")['n'] ?? 0),
-    'views'      => (int) (Database::row("SELECT COALESCE(SUM(views),0) n FROM properties")['n'] ?? 0),
+$u = current_user();
+$uid = (int) $u['id'];
+Database::run("UPDATE users SET last_seen_at = NOW() WHERE id = ?", [$uid]);
+$boot = [
+    'state' => crm_state($uid),
+    'csrf'  => csrf_token(),
+    'vapid' => vapid_public_key(),
+    'site'  => ['name' => 'Reside Kenya', 'url' => rtrim(BASE_URL, '/'), 'phone' => '+254117959105', 'email' => 'residekenya@gmail.com'],
 ];
-
-$recentInquiries = Database::all("SELECT i.*, p.title AS prop_title FROM inquiries i LEFT JOIN properties p ON p.id=i.property_id ORDER BY i.created_at DESC LIMIT 6");
-$recentProps = Database::all("SELECT p.*, co.name AS county_name FROM properties p LEFT JOIN counties co ON co.id=p.county_id ORDER BY p.created_at DESC LIMIT 6");
-$topViewed = Database::all("SELECT title, slug, views FROM properties ORDER BY views DESC LIMIT 5");
-
-$pageTitle = 'Dashboard';
-$activeAdmin = 'dashboard';
-include __DIR__ . '/templates/layout-head.php';
-?>
-<div class="quick-row">
-  <a class="a-btn gold quick-cta" href="<?= e(url('admin/quick-listing.php')) ?>">+ New listing</a>
-  <div class="panel notify-card" id="notifyCard">
-    <div class="nc-text">
-      <strong>Phone notifications</strong> <span class="pill" data-n-status>Checking…</span>
-      <p class="muted" data-n-hint></p>
-    </div>
-    <div class="nc-actions">
-      <button type="button" class="a-btn sm gold" data-n-toggle hidden>Turn on notifications</button>
-      <button type="button" class="a-btn sm" data-n-test hidden>Send test</button>
-    </div>
-  </div>
-</div>
-<div class="stat-cards">
-  <a class="a-card link" href="<?= e(url('admin/properties.php')) ?>"><div class="lbl">Total Properties</div><div class="num gold"><?= number_format($stats['properties']) ?></div></a>
-  <a class="a-card link" href="<?= e(url('admin/properties.php?status=available')) ?>"><div class="lbl">Available</div><div class="num"><?= number_format($stats['available']) ?></div></a>
-  <a class="a-card link" href="<?= e(url('admin/inquiries.php')) ?>"><div class="lbl">Unread Inquiries</div><div class="num"><?= number_format($stats['inquiries']) ?></div></a>
-  <a class="a-card link" href="<?= e(url('admin/bookings.php')) ?>"><div class="lbl">Pending Bookings</div><div class="num"><?= number_format($stats['bookings']) ?></div></a>
-  <a class="a-card link" href="<?= e(url('admin/submissions.php')) ?>"><div class="lbl">New Submissions</div><div class="num"><?= number_format($stats['submissions']) ?></div></a>
-  <a class="a-card link" href="<?= e(url('admin/subscribers.php')) ?>"><div class="lbl">Subscribers</div><div class="num"><?= number_format($stats['subscribers']) ?></div></a>
-  <div class="a-card"><div class="lbl">Total Views</div><div class="num"><?= number_format($stats['views']) ?></div></div>
-  <div class="a-card"><div class="lbl">Featured</div><div class="num"><?= number_format($stats['featured']) ?></div></div>
-</div>
-
-<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:1.6rem" class="dash-grid">
-  <div class="panel">
-    <div class="panel-head"><h2>Recent inquiries</h2><a class="a-btn sm" href="<?= e(url('admin/inquiries.php')) ?>">View all</a></div>
-    <div class="table-wrap">
-      <table class="data">
-        <thead><tr><th>Name</th><th>Type</th><th>Property</th><th>When</th></tr></thead>
-        <tbody>
-          <?php if (!$recentInquiries): ?><tr><td colspan="4" class="muted">No inquiries yet.</td></tr><?php endif; ?>
-          <?php foreach ($recentInquiries as $i): ?>
-            <tr>
-              <td><?= e($i['name']) ?><?php if (!$i['is_read']): ?> <span class="pill warn">new</span><?php endif; ?><div class="muted" style="font-size:.78rem"><?= e($i['email'] ?: $i['phone']) ?></div></td>
-              <td><span class="pill"><?= e($i['type']) ?></span></td>
-              <td class="muted"><?= e($i['prop_title'] ?? '—') ?></td>
-              <td class="muted"><?= e(date('d M, H:i', strtotime($i['created_at']))) ?></td>
-            </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-head"><h2>Most viewed</h2></div>
-    <div class="table-wrap">
-      <table class="data">
-        <thead><tr><th>Property</th><th>Views</th></tr></thead>
-        <tbody>
-          <?php if (!$topViewed): ?><tr><td colspan="2" class="muted">No data yet.</td></tr><?php endif; ?>
-          <?php foreach ($topViewed as $t): ?>
-            <tr><td><a href="<?= e(url('property.php?slug=' . eurl($t['slug']))) ?>" target="_blank" rel="noopener"><?= e($t['title']) ?></a></td><td class="gold"><?= number_format($t['views']) ?></td></tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<div class="panel">
-  <div class="panel-head"><h2>Recently added properties</h2><a class="a-btn gold sm" href="<?= e(url('admin/property-edit.php')) ?>">+ Add Property</a></div>
-  <div class="table-wrap">
-    <table class="data">
-      <thead><tr><th></th><th>Title</th><th>Ref</th><th>Purpose</th><th>Price</th><th>Status</th><th></th></tr></thead>
-      <tbody>
-        <?php if (!$recentProps): ?><tr><td colspan="7" class="muted">No properties yet. <a href="<?= e(url('admin/property-edit.php')) ?>">Add your first →</a></td></tr><?php endif; ?>
-        <?php foreach ($recentProps as $p): ?>
-          <tr>
-            <td><img class="thumb" src="<?= e(asset_url($p['featured_image'] ?? null)) ?>" alt="" onerror="this.style.opacity=.2"></td>
-            <td><?= e($p['title']) ?></td>
-            <td class="muted"><?= e($p['ref_code']) ?></td>
-            <td><span class="pill"><?= e($p['purpose']) ?></span></td>
-            <td><?= e(money($p['price'] ?? null, $p['currency'] ?? 'KES')) ?></td>
-            <td><span class="pill <?= $p['status'] === 'available' ? 'ok' : 'off' ?>"><?= e($p['status']) ?></span></td>
-            <td><a class="a-btn sm" href="<?= e(url('admin/property-edit.php?id=' . (int) $p['id'])) ?>">Edit</a></td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
-</div>
-<style>@media(max-width:900px){.dash-grid{grid-template-columns:1fr!important}}</style>
-<?php include __DIR__ . '/templates/layout-foot.php'; ?>
+$v = ASSET_V;
+header('Cache-Control: no-store');
+?><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F1F3F8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Reside Admin">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Overview · Reside Kenya</title>
+<link rel="manifest" href="/admin/manifest.webmanifest">
+<link rel="icon" href="/admin/icons/admin-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/admin/icons/admin-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/admin/icons/admin-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/app/css/app.css?v=<?= $v ?>">
+</head>
+<body>
+<div class="boot" id="boot"><img src="/assets/img/favicon-64.png" alt="" width="44" height="44"><span>Loading your workspace…</span></div>
+<noscript><p style="padding:24px">The Reside Kenya admin needs JavaScript turned on.</p></noscript>
+<script>window.RESIDE_BOOT = <?= json_encode($boot, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_INVALID_UTF8_SUBSTITUTE) ?>;</script>
+<?php foreach (['data', 'store', 'ui', 'app', 'pages-overview', 'pages-listings', 'pages-deals', 'pages-crm', 'pages-ops', 'live'] as $js): ?>
+<script src="/admin/app/js/<?= $js ?>.js?v=<?= $v ?>"></script>
+<?php endforeach; ?>
+</body>
+</html>

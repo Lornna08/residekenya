@@ -82,7 +82,56 @@
           "value": "public, max-age=300, must-revalidate"
         }
       ]
+    },
+    {
+      "source": "/admin/app/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(css|js)/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ],
-  "fluid": false
+  "fluid": false,
+  "images": {
+    "sizes": [
+      256,
+      384,
+      640,
+      828,
+      1080,
+      1200,
+      1920
+    ],
+    "qualities": [
+      70
+    ],
+    "formats": [
+      "image/webp"
+    ],
+    "minimumCacheTTL": 2592000,
+    "localPatterns": [
+      {
+        "pathname": "^/(uploads|assets)/.*$",
+        "search": ""
+      }
+    ],
+    "remotePatterns": [
+      {
+        "protocol": "https",
+        "hostname": "^[a-z0-9]+\\.public\\.blob\\.vercel-storage\\.com$",
+        "pathname": "^/uploads/.*$"
+      }
+    ]
+  }
 }

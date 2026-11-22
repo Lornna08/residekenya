@@ -10,10 +10,19 @@
 class Database
 {
     private static ?PDO $instance = null;
+    public static float $time = 0.0;
+    public static int $queries = 0;
+
+    /** Cloud region of the database host (for the Server-Timing diagnostics header). */
+    public static function region(): string
+    {
+        return preg_match('/\.([a-z]{2}-[a-z]+-\d)\.aws\.neon\.tech/', (string) parse_url(DATABASE_URL, PHP_URL_HOST), $m) ? $m[1] : 'local';
+    }
 
     public static function conn(): PDO
     {
         if (self::$instance === null) {
+            $t0 = microtime(true);
             $u = parse_url(DATABASE_URL);
             parse_str($u['query'] ?? '', $q);
             $host = $u['host'] ?? 'localhost';
@@ -27,12 +36,16 @@ class Database
             $options = [
                 PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES   => false, // real prepared statements
+                // Values are still bound safely; emulation just sends each query in one
+                // round trip instead of two (prepare + execute), which matters a lot
+                // when the database is a network hop away.
+                PDO::ATTR_EMULATE_PREPARES   => true,
                 PDO::ATTR_STRINGIFY_FETCHES  => false,
             ];
             try {
                 self::$instance = new PDO($dsn, urldecode($u['user'] ?? ''), urldecode($u['pass'] ?? ''), $options);
                 self::$instance->exec("SET TIME ZONE 'Africa/Nairobi'");
+                self::$time += microtime(true) - $t0;
             } catch (PDOException $e) {
                 if (APP_ENV === 'production') {
                     error_log('DB connection failed: ' . $e->getMessage());
@@ -54,8 +67,11 @@ class Database
 
     private static function stmt(string $sql, array $params): PDOStatement
     {
-        $stmt = self::conn()->prepare(self::sql($sql));
+        $pdo = self::conn();
+        $t0 = microtime(true);
+        $stmt = $pdo->prepare(self::sql($sql));
         $stmt->execute(array_map(fn($v) => is_bool($v) ? (int) $v : $v, array_values($params)));
+        self::$time += microtime(true) - $t0; self::$queries++;
         return $stmt;
     }
 

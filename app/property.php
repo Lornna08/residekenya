@@ -17,7 +17,7 @@ if (!$p || in_array($p['status'], ['archived', 'draft'], true)) {
     exit;
 }
 
-Property::incrementViews((int) $p['id']);
+// Views are counted by a tiny beacon at the end of the page (the page itself may be served from cache).
 $images    = Property::images((int) $p['id'], false);
 $floorplans = Property::images((int) $p['id'], true);
 $amenities = Property::amenities((int) $p['id']);
@@ -95,7 +95,7 @@ include __DIR__ . '/templates/header.php';
         $isLast = ($i === 4 && count($galleryImgs) > 5);
     ?>
       <a href="<?= e($src) ?>" class="<?= $i === 0 ? 'g-main' : '' ?>" data-lb="<?= $i ?>" aria-label="View image <?= $i + 1 ?>">
-        <img src="<?= e($src) ?>" alt="<?= e($alt) ?>" loading="<?= $i === 0 ? 'eager' : 'lazy' ?>">
+        <img src="<?= e(img_src($img['file_path'], $i === 0 ? 1200 : 828)) ?>" srcset="<?= e(img_srcset($img['file_path'], $i === 0 ? [828, 1200, 1920] : [640, 828])) ?>" sizes="<?= $i === 0 ? '(max-width: 900px) 100vw, 60vw' : '(max-width: 900px) 50vw, 25vw' ?>" alt="<?= e($alt) ?>" loading="<?= $i === 0 ? 'eager' : 'lazy' ?>" decoding="async"<?= $i === 0 ? ' fetchpriority="high"' : '' ?>>
         <?php if ($isLast): ?><span class="g-more">+<?= count($galleryImgs) - 5 ?> photos</span><?php endif; ?>
       </a>
     <?php endforeach; ?>
@@ -278,7 +278,7 @@ include __DIR__ . '/templates/header.php';
           </div>
         </div>
         <?php else: ?>
-        <div class="who"><div><div class="nm">Reside Ke</div><div class="rl">Property Consultant</div></div></div>
+        <div class="who"><div><div class="nm">Reside Kenya</div><div class="rl">Property Consultant</div></div></div>
         <?php endif; ?>
 
         <div class="contact-actions">
@@ -388,7 +388,7 @@ include __DIR__ . '/templates/header.php';
 </div>
 
 <?php
-$galleryJson = json_encode(array_map(fn($i) => asset_url($i['file_path']), $galleryImgs), JSON_UNESCAPED_SLASHES);
+$galleryJson = json_encode(array_map(fn($i) => img_src($i['file_path'], 1920), $galleryImgs), JSON_UNESCAPED_SLASHES);
 $extraFoot = <<<HTML
 <script>
 (function(){
@@ -471,4 +471,5 @@ HTML;
 if (RECAPTCHA_SITE_KEY) {
     $extraFoot .= '<script src="https://www.google.com/recaptcha/api.js" async defer></script>';
 }
+$extraFoot = ($extraFoot ?? '') . '<script>try{navigator.sendBeacon("/api/view.php?id=' . (int) $p['id'] . '")}catch(e){}</script>';
 include __DIR__ . '/templates/footer.php';

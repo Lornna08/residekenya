@@ -43,7 +43,7 @@ if ($action === 'unsubscribe') {
 }
 
 if ($action === 'test') {
-    $n = notify_admins('Notifications are on ✅', 'You will get alerts here for new inquiries, viewing requests, bookings and property submissions.', 'admin/index.php', 'test');
+    $n = notify_admins('Notifications are on ✅', 'You will get alerts here for new inquiries, viewing requests, bookings and property submissions.', 'admin/', 'test');
     json_out(['ok' => $n > 0, 'sent' => $n, 'error' => $n ? null : 'No device received it. Turn notifications off and on again.']);
 }
 

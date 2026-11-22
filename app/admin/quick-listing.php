@@ -91,6 +91,7 @@ include __DIR__ . '/templates/layout-head.php';
   <p class="muted"><?= e($done['title']) ?> · <?= (int) $done['photos'] ?> photo<?= $done['photos'] == 1 ? '' : 's' ?></p>
   <div class="ql-done-actions">
     <?php if ($done['published']): ?><a class="a-btn" href="<?= e(url('property/' . $done['slug'])) ?>" target="_blank" rel="noopener">View on website</a><?php endif; ?>
+    <a class="a-btn" href="/admin/#/property/p<?= (int) $done['id'] ?>">Open in workspace</a>
     <a class="a-btn" href="<?= e(url('admin/property-edit.php?id=' . (int) $done['id'])) ?>">Add more details</a>
     <a class="a-btn gold" href="<?= e(url('admin/quick-listing.php')) ?>">+ Add another listing</a>
   </div>

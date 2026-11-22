@@ -71,7 +71,7 @@ require __DIR__ . '/templates/header.php';
 <!-- HERO + SEARCH -->
 <section class="hero">
   <div class="hero__bg">
-    <img src="<?= e(asset_url($heroImage)) ?>" alt="Luxury Kenyan home" fetchpriority="high" width="1920" height="1080">
+    <img src="<?= e(img_src($heroImage, 1920)) ?>" srcset="<?= e(img_srcset($heroImage, [828, 1200, 1920])) ?>" sizes="100vw" alt="Luxury Kenyan home" fetchpriority="high" decoding="async" width="1920" height="1080">
   </div>
   <div class="wrap hero__inner">
     <span class="eyebrow"><?= e($heroEyebrow) ?></span>
@@ -197,7 +197,7 @@ $endcap = function (string $key) use (&$blocks) {
     <div class="cat-grid">
       <?php foreach ($categories as $cat): ?>
         <a class="cat-tile reveal" href="<?= e(url('listings.php?category=' . eurl($cat['slug']))) ?>">
-          <img src="<?= e(!empty($cat['tile_image']) ? asset_url($cat['tile_image']) : url('assets/img/cat/' . $cat['slug'] . '.jpg')) ?>" alt="<?= e($cat['name']) ?>" loading="lazy" width="400" height="533">
+          <?php $__tile = cat_tile_image($cat); ?><img src="<?= e(img_src($__tile, 640)) ?>" srcset="<?= e(img_srcset($__tile, [384, 640])) ?>" sizes="(max-width: 640px) 46vw, 300px" alt="<?= e($cat['name']) ?>" loading="lazy" decoding="async" width="400" height="533">
           <div>
             <h3><?= e($cat['name']) ?></h3>
             <span><?= e($cat['description'] ?? 'View listings') ?></span>
@@ -296,7 +296,7 @@ $endcap = function (string $key) use (&$blocks) {
 <section class="section wrap">
   <div class="section-head center" style="justify-content:center">
     <div>
-      <span class="eyebrow"><?= e(hp_text('why', 'eyebrow', 'Why Reside Ke')) ?></span>
+      <span class="eyebrow"><?= e(hp_text('why', 'eyebrow', 'Why Reside Kenya')) ?></span>
       <h2><?= e(hp_text('why', 'heading', 'Property, done properly.')) ?></h2>
       <p style="margin-inline:auto">A trusted, transparent, customer-focused platform built for the Kenyan market.</p>
     </div>
@@ -355,10 +355,10 @@ $endcap = function (string $key) use (&$blocks) {
 <?php $capture('cta'); ?>
 <section class="section wrap">
   <div class="cta-band reveal">
-    <img src="<?= e(url('assets/img/cta.jpg')) ?>" alt="" loading="lazy" width="1600" height="700">
+    <img src="<?= e(img_src('assets/img/cta.jpg', 1200)) ?>" srcset="<?= e(img_srcset('assets/img/cta.jpg', [828, 1200, 1920])) ?>" sizes="100vw" alt="" loading="lazy" decoding="async" width="1600" height="700">
     <span class="eyebrow" style="color:var(--gold);justify-content:center"><?= e(hp_text('cta', 'eyebrow', 'Sell or rent with us')) ?></span>
     <h2><?= e(hp_text('cta', 'heading', 'Looking to sell or rent your property?')) ?></h2>
-    <p>List with Reside Ke and reach serious, ready buyers and tenants across Kenya. Professional presentation, honest advice, real results.</p>
+    <p>List with Reside Kenya and reach serious, ready buyers and tenants across Kenya. Professional presentation, honest advice, real results.</p>
     <a class="btn btn--gold" href="<?= e(url('list-property.php')) ?>">List Your Property</a>
   </div>
 </section>

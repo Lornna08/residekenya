@@ -4,7 +4,7 @@ require __DIR__ . '/includes/bootstrap.php';
 
 $seo = [
     'title'       => 'About Us — ' . SITE_NAME,
-    'description' => 'Reside Ke is a premium Kenyan real estate platform connecting people with quality homes, rentals, commercial spaces, land and Airbnb stays through a trusted, transparent experience.',
+    'description' => 'Reside Kenya is a premium Kenyan real estate platform connecting people with quality homes, rentals, commercial spaces, land and Airbnb stays through a trusted, transparent experience.',
     'canonical'   => url('about.php'),
 ];
 $activeNav = 'About';
@@ -26,7 +26,7 @@ include __DIR__ . '/templates/header.php';
   <div class="wrap">
     <p class="eyebrow">Our story</p>
     <h1 class="display">Property, done properly</h1>
-    <p>Reside Ke was built on a simple belief: finding a home, an investment, or the perfect stay should feel effortless, transparent, and genuinely premium.</p>
+    <p>Reside Kenya was built on a simple belief: finding a home, an investment, or the perfect stay should feel effortless, transparent, and genuinely premium.</p>
   </div>
 </section>
 
@@ -75,7 +75,7 @@ include __DIR__ . '/templates/header.php';
 <section class="cta-band">
   <div class="wrap center">
     <h2 class="display">Ready to find your next address?</h2>
-    <p class="lede">Browse our curated collection or list your own property with Reside Ke today.</p>
+    <p class="lede">Browse our curated collection or list your own property with Reside Kenya today.</p>
     <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.6rem">
       <a class="btn btn--gold" href="<?= e(url('listings.php')) ?>">Browse Listings</a>
       <a class="btn btn--light" href="<?= e(url('list-property.php')) ?>">List Your Property</a>

@@ -15,5 +15,12 @@ require __DIR__ . '/auth.php';
 require __DIR__ . '/Property.php';
 require __DIR__ . '/seo.php';
 require __DIR__ . '/push.php';
+require __DIR__ . '/crm.php';
 
-boot_session();
+// Sessions start only when a page needs one (sign-in, forms, flash messages), or when
+// the visitor already has a session cookie. Public pages without one stay cookie-free,
+// which lets Vercel cache them at the edge.
+if (!empty($_COOKIE[SESSION_NAME]) || str_starts_with((string) ($_SERVER['SCRIPT_NAME'] ?? ''), '/admin/')) boot_session();
+
+// One-off upgrades run once, on the first request after a deploy.
+if ((int) setting('schema_version', '1') < 4) crm_schema();

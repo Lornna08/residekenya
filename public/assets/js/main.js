@@ -1,4 +1,4 @@
-/* Reside Ke — frontend behaviour. Vanilla, no dependencies. */
+/* Reside Kenya — frontend behaviour. Vanilla, no dependencies. */
 (function () {
   "use strict";
 
@@ -70,10 +70,10 @@
       });
     }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
     reveals.forEach(function (el) { io.observe(el); });
-    /* Failsafe: if any reveal hasn't shown within 1.2s, reveal it anyway */
+    /* Failsafe: show everything quickly even if the observer is slow */
     setTimeout(function () {
       reveals.forEach(function (el) { el.classList.add("in"); });
-    }, 1200);
+    }, 500);
   } else {
     reveals.forEach(function (el) { el.classList.add("in"); });
   }

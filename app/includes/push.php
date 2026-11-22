@@ -109,12 +109,19 @@ function push_encrypt(string $payload, string $uaPublicB64, string $authB64): st
  * Send a notification to every admin device that turned notifications on.
  * $data: title, body, url, tag. Returns number of devices reached.
  */
-function notify_admins(string $title, string $body, string $url = 'admin/index.php', string $tag = 'reside'): int
+function notify_user(int $userId, string $title, string $body, string $url = 'admin/', string $tag = 'reside'): int
+{
+    return notify_admins($title, $body, $url, $tag, $userId);
+}
+
+function notify_admins(string $title, string $body, string $url = 'admin/', string $tag = 'reside', ?int $onlyUser = null): int
 {
     if (!push_enabled()) return 0;
     try {
         ensure_schema();
-        $subs = Database::all("SELECT id, endpoint, p256dh, auth FROM push_subscriptions");
+        $subs = $onlyUser
+            ? Database::all("SELECT id, endpoint, p256dh, auth FROM push_subscriptions WHERE user_id = ?", [$onlyUser])
+            : Database::all("SELECT id, endpoint, p256dh, auth FROM push_subscriptions");
     } catch (Throwable $e) {
         return 0;
     }

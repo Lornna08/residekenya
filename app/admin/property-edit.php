@@ -334,7 +334,7 @@ include __DIR__ . '/templates/layout-head.php';
 
   <div style="display:flex;gap:.8rem;position:sticky;bottom:0;background:var(--a-bg);padding:1rem 0;border-top:1px solid var(--a-line)">
     <button class="a-btn gold" type="submit"><?= $editing ? 'Save Changes' : 'Create Property' ?></button>
-    <a class="a-btn ghost" href="<?= e(url('admin/properties.php')) ?>">Cancel</a>
+    <a class="a-btn ghost" href="<?= $editing ? '/admin/#/property/p' . (int) $p['id'] : '/admin/#/listings' ?>">Cancel</a>
   </div>
 </form>
 <script src="<?= e(url('assets/js/main.js')) ?>" defer></script>

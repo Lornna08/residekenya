@@ -1,26 +1,35 @@
-    </div><!-- /admin-body -->
-  </div><!-- /admin-main -->
-</div><!-- /admin-shell -->
-<?php $__inbox = ($unreadInquiries ?? 0) + ($pendingBookings ?? 0) + ($newSubmissions ?? 0); $__a = $activeAdmin ?? ''; ?>
-<nav class="tabbar" aria-label="App">
-  <a href="<?= e(url('admin/index.php')) ?>" class="<?= $__a === 'dashboard' ? 'on' : '' ?>"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 10v10h13V10"/></svg><span>Home</span></a>
-  <a href="<?= e(url('admin/inquiries.php')) ?>" class="<?= in_array($__a, ['inquiries','bookings','submissions'], true) ? 'on' : '' ?>"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg><span>Inbox</span><b class="tb-badge" data-badge="inbox" <?= $__inbox ? '' : 'hidden' ?>><?= $__inbox > 99 ? '99+' : $__inbox ?></b></a>
-  <a href="<?= e(url('admin/quick-listing.php')) ?>" class="tb-add <?= $__a === 'quick-listing' ? 'on' : '' ?>" aria-label="New listing"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></a>
-  <a href="<?= e(url('admin/properties.php')) ?>" class="<?= in_array($__a, ['properties','property-edit'], true) ? 'on' : '' ?>"><svg viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11zM9 20v-6h6v6"/></svg><span>Listings</span></a>
-  <a href="#" id="tabMore"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>More</span></a>
-</nav>
+  </main>
+</div>
 <script>
-(function(){
-  var t = document.getElementById('adminToggle'), s = document.getElementById('adminSide');
-  if(t&&s){ t.addEventListener('click', function(){ s.classList.toggle('open'); }); }
-  // Confirm destructive actions
-  document.querySelectorAll('form[data-confirm]').forEach(function(f){
-    f.addEventListener('submit', function(e){ if(!confirm(f.getAttribute('data-confirm'))) e.preventDefault(); });
+(function () {
+  var more = document.getElementById('lxMore'), drawer = document.getElementById('lxDrawer');
+  function closeMore() { more.hidden = true; }
+  function openDrawer() { drawer.hidden = false; document.documentElement.classList.add('is-locked'); requestAnimationFrame(function () { drawer.classList.add('is-in'); }); }
+  function closeDrawer() { drawer.classList.remove('is-in'); document.documentElement.classList.remove('is-locked'); setTimeout(function () { drawer.hidden = true; }, 260); }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-lx]');
+    if (b && b.dataset.lx === 'more') {
+      e.stopPropagation();
+      if (!more.hidden) return closeMore();
+      more.hidden = false;
+      var r = b.getBoundingClientRect(), w = more.offsetWidth;
+      more.style.left = Math.max(8, Math.min(r.right - w, innerWidth - w - 8)) + 'px';
+      more.style.top = (r.bottom + 6) + 'px';
+      return;
+    }
+    if (b && b.dataset.lx === 'drawer') return openDrawer();
+    if (b && b.dataset.lx === 'close') return closeDrawer();
+    if (!e.target.closest('#lxMore')) closeMore();
   });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeMore(); if (!drawer.hidden) closeDrawer(); } });
+  addEventListener('scroll', function () { closeMore(); document.querySelector('.top').classList.toggle('is-stuck', scrollY > 4); }, { passive: true });
+  document.querySelectorAll('form[data-confirm]').forEach(function (f) {
+    f.addEventListener('submit', function (e) { if (!confirm(f.getAttribute('data-confirm'))) e.preventDefault(); });
+  });
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/admin/sw.js', { scope: '/admin/' }).catch(function () {});
 })();
 </script>
 <script src="<?= e(url('assets/js/upload-resize.js')) ?>"></script>
-<script src="/admin/assets/app.js"></script>
 <script src="/admin/assets/photo-uploader.js"></script>
 <?= $extraAdminFoot ?? '' ?>
 </body>

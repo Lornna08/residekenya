@@ -89,10 +89,11 @@ foreach ($rows as $k => $v) {
 }
 $body .= '</table>';
 send_mail(setting('contact_email', ADMIN_EMAIL), $subject, $body);
+crm_capture('inquiry', $inquiryId);
 notify_admins(
     ($type === 'viewing' ? '📅 Viewing request' : '✉️ New ' . strtolower($labelMap[$type] ?? 'enquiry')) . ' — ' . $name,
     trim(($property ? $property['title'] . "\n" : '') . ($phone ?: $email) . ($message ? ' · ' . mb_strimwidth($message, 0, 90, '…') : '') . ($prefDate ? ' · ' . date('D d M', strtotime($prefDate)) : '')),
-    'admin/inquiries.php', 'inquiry-' . $inquiryId
+    'admin/#/leads?lead=ldw' . $inquiryId, 'inquiry-' . $inquiryId
 );
 
 $okMsg = $type === 'viewing'

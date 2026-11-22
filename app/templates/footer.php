@@ -4,7 +4,7 @@
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a class="brand" href="<?= e(url('/')) ?>"><img class="brand-logo" src="<?= e(url('assets/img/logo.png')) ?>" alt="Reside Ke" width="216" height="165"></a>
+        <a class="brand" href="<?= e(url('/')) ?>" aria-label="Reside Kenya home"><img class="brand-mark" src="/assets/img/mark-light.png" alt="" width="44" height="48"><span class="brand-word">Reside <b>Kenya</b></span></a>
         <p>Connecting people with quality homes, rentals, investment properties, commercial spaces and Airbnb stays across Kenya — through a trusted, transparent platform.</p>
         <div class="newsletter">
           <form id="newsletterForm" style="display:flex;gap:.5rem;flex:1" novalidate>
@@ -50,7 +50,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© <?= date('Y') ?> Reside Ke. All rights reserved.</span>
+      <span>© <?= date('Y') ?> Reside Kenya. All rights reserved.</span>
       <span>Premium property across Kenya.</span>
     </div>
   </div>
@@ -59,7 +59,7 @@
    style="position:fixed;right:20px;bottom:20px;z-index:120;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px -8px rgba(0,0,0,.4)">
   <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.4A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-1-.3-1.6-.6-2.9-1.3-4.8-4.2-4.9-4.4-.1-.2-1.2-1.6-1.2-3 0-1.4.8-2.1 1-2.4.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5c-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.1 2.3 1.5 2.6 1.6.2.1.4.1.6-.1l.7-.9c.2-.3.4-.2.6-.1l2 1c.3.1.4.2.5.3.1.2.1.9-.1 1.6z"/></svg>
 </a>
-<script src="<?= e(url('assets/js/main.js')) ?>" defer></script>
+<script src="<?= e(url('assets/js/main.js')) ?>?v=<?= ASSET_V ?>" defer></script>
 <script src="<?= e(url('assets/js/upload-resize.js')) ?>" defer></script>
 <?= $extraFoot ?? '' ?>
 </body>

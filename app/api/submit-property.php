@@ -92,10 +92,12 @@ $body = '<h2 style="font-family:Georgia,serif;color:#16150f">New property submis
     . '<tr><td><strong>Description</strong></td><td>' . nl2br(e($description ?: '—')) . '</td></tr>'
     . '</table>';
 send_mail(setting('contact_email', ADMIN_EMAIL), 'New property submission — ' . SITE_NAME, $body);
+$__sub = Database::row("SELECT id FROM submissions ORDER BY id DESC LIMIT 1");
+if ($__sub) crm_capture('submission', (int) $__sub['id']);
 notify_admins(
     '🏠 New property submitted — ' . $fullName,
     trim(($propertyType ?: 'Property') . ' · ' . $propertyStatus . ($location ? ' · ' . $location : '') . ' · ' . $phone),
-    'admin/submissions.php', 'submission-' . time()
+    'admin/#/leads?lead=lds' . ($__sub['id'] ?? ''), 'submission-' . time()
 );
 
 flash('success', 'Thank you! Your property has been submitted. Our team will review it and contact you shortly.');

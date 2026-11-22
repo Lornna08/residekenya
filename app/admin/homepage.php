@@ -14,7 +14,7 @@ $SECTIONS = [
     'luxury'     => ['label' => 'Luxury Collection', 'eyebrow' => 'The finest', 'heading' => 'Luxury Collection', 'sub' => ''],
     'latest'     => ['label' => 'Latest Listings', 'eyebrow' => 'Just added', 'heading' => 'Latest Listings', 'sub' => ''],
     'airbnb'     => ['label' => 'Airbnb & Holiday Homes', 'eyebrow' => 'Short stays', 'heading' => 'Airbnb & Holiday Homes', 'sub' => ''],
-    'why'        => ['label' => 'Why Reside Ke', 'eyebrow' => 'Why Reside Ke', 'heading' => 'Property, done properly.', 'sub' => ''],
+    'why'        => ['label' => 'Why Reside Kenya', 'eyebrow' => 'Why Reside Kenya', 'heading' => 'Property, done properly.', 'sub' => ''],
     'testimonials' => ['label' => 'Testimonials', 'eyebrow' => 'Kind words', 'heading' => 'Loved by our clients', 'sub' => ''],
     'cta'        => ['label' => 'Call to action (Sell/Rent)', 'eyebrow' => 'Sell or rent with us', 'heading' => 'Looking to sell or rent your property?', 'sub' => ''],
 ];

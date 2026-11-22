@@ -4,7 +4,7 @@ require __DIR__ . '/includes/bootstrap.php';
 
 $seo = [
     'title'       => 'List Your Property — ' . SITE_NAME,
-    'description' => 'List your property with Reside Ke. Sell, rent, or offer your home as an Airbnb stay. Reach serious buyers and guests across Kenya.',
+    'description' => 'List your property with Reside Kenya. Sell, rent, or offer your home as an Airbnb stay. Reach serious buyers and guests across Kenya.',
     'canonical'   => url('list-property.php'),
 ];
 $activeNav = '';
@@ -97,7 +97,7 @@ include __DIR__ . '/templates/header.php';
 
       <?php if (RECAPTCHA_SITE_KEY): ?><div class="g-recaptcha" data-sitekey="<?= e(RECAPTCHA_SITE_KEY) ?>" style="margin-bottom:1rem"></div><?php endif; ?>
       <button class="btn btn--gold btn--block" type="submit">Submit Property</button>
-      <p class="hint" style="text-align:center;margin-top:1rem">By submitting, you agree to be contacted by Reside Ke about your listing.</p>
+      <p class="hint" style="text-align:center;margin-top:1rem">By submitting, you agree to be contacted by Reside Kenya about your listing.</p>
     </form>
   </div>
 </div>
