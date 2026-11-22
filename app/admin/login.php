@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="admin">
 <div class="login-wrap">
   <div class="login-card">
-    <div class="lb"><img src="/assets/img/favicon-192.png" alt=""><span>RESIDE<b>KE</b></span></div>
+    <div class="lb"><img src="/assets/img/favicon-192.png" alt=""><span>Reside <b>Kenya</b></span></div>
     <p class="sub">Sign in to your workspace</p>
     <?php if ($f = flash('error')): ?><div class="a-flash error"><?= e($f) ?></div><?php endif; ?>
     <form method="post" action="<?= e(url('admin/login')) ?>">
