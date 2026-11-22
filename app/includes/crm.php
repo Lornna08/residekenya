@@ -11,7 +11,7 @@
  * Website inquiries, bookings and property submissions become leads automatically.
  */
 
-const CRM_COLLS = ['contacts', 'leads', 'deals', 'events', 'docs', 'leases', 'payments', 'maintenance', 'applications', 'msgs', 'activity', 'notifications'];
+const CRM_COLLS = ['contacts', 'leads', 'deals', 'events', 'docs', 'leases', 'payments', 'maintenance', 'applications', 'msgs', 'activity', 'notifications', 'commissions'];
 
 const CRM_STATUS_TO_DB = ['active' => 'available', 'under_offer' => 'under_offer', 'sold' => 'sold', 'let' => 'rented', 'draft' => 'draft', 'withdrawn' => 'archived'];
 

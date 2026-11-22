@@ -262,18 +262,18 @@
     redrawOnResize: true,
     render: function (v) {
       var now = Date.now(), yr = 365 * DAY;
-      var won = st.wonDeals().filter(function (d) { return now - new Date(d.closedAt) < yr && (!CU.agent || d.agentId === CU.agent); });
+      var won = st.wonDeals().concat(st.s.commissions).filter(function (d) { return now - new Date(d.closedAt) < yr && (!CU.agent || d.agentId === CU.agent); });
       var open = st.openDeals().filter(function (d) { return !CU.agent || d.agentId === CU.agent; });
       var sum = function (arr) { return arr.reduce(function (a, d) { return a + st.commission(d); }, 0); };
       var projected = sum(open), earned = sum(won.filter(function (d) { return d.commissionStatus === 'earned'; })), approved = sum(won.filter(function (d) { return d.commissionStatus === 'approved'; })), paid = sum(won.filter(function (d) { return d.commissionStatus === 'paid'; }));
       var series = st.commissionSeries(CU.period, CU.agent || null), target = st.s.settings.monthlyTarget * (CU.agent ? 1 / 5 : 1);
       var thisM = series[series.length - 1].value;
       var byAgent = st.s.team.map(function (u) { return { u: u, v: sum(won.filter(function (d) { return d.agentId === u.id; })) }; }).filter(function (x) { return x.v; }).sort(function (a, b) { return b.v - a.v; });
-      var types = {}; won.forEach(function (d) { var t = st.prop(d.propertyId).type; types[t] = (types[t] || 0) + st.commission(d); });
+      var types = {}; won.forEach(function (d) { var t = d.manual ? 'Added by hand' : st.prop(d.propertyId).type; types[t] = (types[t] || 0) + st.commission(d); });
       var palette = ['#2F5BEA', '#1F9D6A', '#F59E0B', '#7C8CF8', '#0F1729', '#38BDF8'];
       var tParts = Object.keys(types).sort(function (a, b) { return types[b] - types[a]; }).map(function (k, i) { return { label: k, value: types[k], color: palette[i % palette.length] }; });
       var rows = won.filter(function (d) { return !CU.status || d.commissionStatus === CU.status; }).sort(function (a, b) { return new Date(b.closedAt) - new Date(a.closedAt); });
-      v.innerHTML = '<header class="ph"><h1>Commissions</h1><div class="ph__a"><select class="sel" data-cf="agent" aria-label="Agent"><option value="">Whole team</option>' + st.s.team.map(function (u) { return '<option value="' + u.id + '"' + (CU.agent === u.id ? ' selected' : '') + '>' + u.name + '</option>'; }).join('') + '</select><button class="btn" data-c="csv">' + I('download', 15) + 'Export CSV</button></div></header>' +
+      v.innerHTML = '<header class="ph"><h1>Commissions</h1><div class="ph__a"><button class="btn btn--dark" data-c="add">' + I('plus', 15) + 'Add commission</button><select class="sel" data-cf="agent" aria-label="Agent"><option value="">Whole team</option>' + st.s.team.map(function (u) { return '<option value="' + u.id + '"' + (CU.agent === u.id ? ' selected' : '') + '>' + u.name + '</option>'; }).join('') + '</select><button class="btn" data-c="csv">' + I('download', 15) + 'Export CSV</button></div></header>' +
         '<div class="kgrid">' +
         statCard('Projected', f.money(projected, true), open.length + ' open deals · not yet income', 'grey') +
         statCard('Earned', f.money(earned, true), 'Closed, awaiting approval', 'blue') +
@@ -286,7 +286,7 @@
         '<article class="card"><header class="card__h"><span class="card__t">' + I('layers', 16) + 'Projected from open deals</span></header>' + (open.length ? ES.chart.hbars(open.slice().sort(function (a, b) { return st.commission(b) - st.commission(a); }).slice(0, 6).map(function (d) { return { label: st.prop(d.propertyId).title, value: st.commission(d), sub: st.stage(d.stage).p + '%', color: st.stage(d.stage).c }; }), { vfmt: function (n) { return f.money(n, true); } }) : '<p class="muted">No open deals.</p>') + '</article></div>' +
         '<div class="tb"><h2 style="font-size:16px;font-weight:650">Commission records</h2><span class="tb__sp"></span><span class="seg">' + [['', 'All'], ['earned', 'Earned'], ['approved', 'Approved'], ['paid', 'Paid']].map(function (o) { return '<button data-c="st" data-v="' + o[0] + '" class="' + (CU.status === o[0] ? 'is-on' : '') + '">' + o[1] + '</button>'; }).join('') + '</span></div>' +
         '<div class="t-wrap"><table class="t"><thead><tr><th>Deal</th><th>Property</th><th>Agent</th><th class="r">Deal value</th><th class="r">Rate</th><th class="r">Commission</th><th>Status</th><th>Closed</th><th></th></tr></thead><tbody>' +
-        rows.map(function (d) { var p = st.prop(d.propertyId), u = st.user(d.agentId); return '<tr><td><a class="lnk" href="#/deal/' + d.id + '">' + d.ref + '</a></td><td>' + esc(p.title) + '<span class="t-sub">' + (d.kind === 'rent' ? 'Letting' : 'Sale') + ' · ' + esc(p.type) + '</span></td><td><span class="t-who">' + ES.av(u, 22) + esc(u.name) + '</span></td><td class="r">' + f.money(d.value, true) + '</td><td class="r">' + (d.kind === 'rent' ? st.s.settings.rentMonths + ' mo' : (d.rate != null ? d.rate : st.s.settings.saleRate) + '%') + '</td><td class="r"><b>' + f.money(st.commission(d)) + '</b></td><td>' + ES.pill(d.commissionStatus, { earned: 'blue', approved: 'violet', paid: 'green' }[d.commissionStatus] || 'grey') + '</td><td>' + f.date(d.closedAt) + '</td><td class="r">' + (d.commissionStatus === 'earned' ? '<button class="btn btn--sm" data-c="ap" data-id="' + d.id + '">Approve</button>' : d.commissionStatus === 'approved' ? '<button class="btn btn--sm" data-c="pay" data-id="' + d.id + '">Record paid</button>' : '') + '</td></tr>'; }).join('') +
+        rows.map(function (d) { var p = d.manual ? { title: d.title, type: 'Added by hand' } : st.prop(d.propertyId), u = st.user(d.agentId); return '<tr><td>' + (d.manual ? '<span class="muted">Manual</span>' : '<a class="lnk" href="#/deal/' + d.id + '">' + d.ref + '</a>') + '</td><td>' + esc(p.title) + '<span class="t-sub">' + (d.kind === 'rent' ? 'Letting' : 'Sale') + ' · ' + esc(p.type) + (d.commissionNote ? ' · ' + esc(d.commissionNote) : '') + '</span></td><td><span class="t-who">' + ES.av(u, 22) + esc(u.name) + '</span></td><td class="r">' + (d.manual ? '—' : f.money(d.value, true)) + '</td><td class="r">' + (d.manual || d.commissionAmount != null ? '<span class="muted">custom</span>' : d.kind === 'rent' ? st.s.settings.rentMonths + ' mo' : (d.rate != null ? d.rate : st.s.settings.saleRate) + '%') + '</td><td class="r"><b>' + f.money(st.commission(d)) + '</b></td><td>' + ES.pill(d.commissionStatus, { earned: 'blue', approved: 'violet', paid: 'green' }[d.commissionStatus] || 'grey') + '</td><td>' + f.date(d.closedAt) + '</td><td class="r">' + (d.commissionStatus === 'earned' ? '<button class="btn btn--sm" data-c="ap" data-id="' + d.id + '">Approve</button>' : d.commissionStatus === 'approved' ? '<button class="btn btn--sm" data-c="pay" data-id="' + d.id + '">Record paid</button>' : '') + ' <button class="btn btn--sm" data-c="edit" data-id="' + d.id + '">Edit</button></td></tr>'; }).join('') +
         '</tbody></table></div>';
       ES.chart.line(v.querySelector('#cmc'), { h: 210, labels: series.map(function (x) { return f.mon(x.date); }), tipLabels: series.map(function (x) { return f.mon(x.date) + ' ' + x.date.getFullYear() + ' · ' + x.count + ' closed'; }), series: [{ values: series.map(function (x) { return x.value; }), color: '#2F5BEA', label: 'Earned' }], target: target, vfmt: function (n) { return f.money(n, true); } });
       v.onchange = function (e) { if (e.target.dataset.cf) { CU.agent = e.target.value; ES.app.refresh(); } };
@@ -296,10 +296,38 @@
         if (k === 'st') { CU.status = b.dataset.v; ES.app.refresh(); }
         if (k === 'ap') ES.try(function () { st.setCommissionStatus(b.dataset.id, 'approved'); }, 'Commission approved');
         if (k === 'pay') ES.confirm({ title: 'Record commission as paid?', icon: 'wallet', tone: 'green', ok: 'Record as paid', text: 'This marks the commission as settled in Reside Kenya. It’s a record only — no money moves.', onOk: function () { ES.try(function () { st.setCommissionStatus(b.dataset.id, 'paid'); }, 'Commission recorded as paid'); } });
-        if (k === 'csv') ES.csv('reside-ke-commissions.csv', [['Deal', 'Property', 'Type', 'Agent', 'Deal value (KES)', 'Rate', 'Commission (KES)', 'Status', 'Closed']].concat(rows.map(function (d) { return [d.ref, st.prop(d.propertyId).title, d.kind, st.user(d.agentId).name, d.value, d.kind === 'rent' ? st.s.settings.rentMonths + ' month(s)' : (d.rate != null ? d.rate : st.s.settings.saleRate) + '%', st.commission(d), d.commissionStatus, f.dateLong(d.closedAt)]; })));
+        if (k === 'add') commissionModal(null);
+        if (k === 'edit') commissionModal(b.dataset.id);
+        if (k === 'csv') ES.csv('reside-ke-commissions.csv', [['Deal', 'Property', 'Type', 'Agent', 'Deal value (KES)', 'Rate', 'Commission (KES)', 'Status', 'Closed']].concat(rows.map(function (d) { return [d.manual ? 'Manual' : d.ref, d.manual ? d.title : st.prop(d.propertyId).title, d.kind, st.user(d.agentId).name, d.value, d.manual || d.commissionAmount != null ? 'custom' : d.kind === 'rent' ? st.s.settings.rentMonths + ' month(s)' : (d.rate != null ? d.rate : st.s.settings.saleRate) + '%', st.commission(d), d.commissionStatus, f.dateLong(d.closedAt)]; })));
       };
     }
   };
+  // Add a commission by hand, or edit one that's already on the list (amount, date earned, agent, status).
+  function commissionModal(id) {
+    var d = id ? (st.deal(id) || st.s.commissions.filter(function (x) { return x.id === id; })[0]) : null;
+    var isNew = !d, manual = isNew || d.manual, cur = d ? st.commission(d) : '';
+    var title = isNew ? 'Add commission' : 'Edit commission';
+    var sub = isNew ? 'Record commission you earned — it counts in every total and chart' : (manual ? esc(d.title) : esc(st.prop(d.propertyId).title) + ' · ' + d.ref);
+    var panel = ES.open('modal', ES.head(title, sub) + '<form class="ovl__body" id="cmf" novalidate><div class="g2">' +
+      (manual ? ES.field('What was it for? *', '<input name="title" value="' + esc(d ? d.title : '') + '" placeholder="e.g. Kilimani 2BR sale — Mr Otieno">', '', 'span2') : '') +
+      ES.field('Commission (KES) *', '<input name="amount" data-num inputmode="numeric" value="' + cur + '">', manual ? '' : 'Standard would be ' + f.money(Math.round(d.kind === 'rent' ? d.value * (st.s.settings.rentMonths || 1) : d.value * (d.rate != null ? d.rate : st.s.settings.saleRate) / 100)) + ' — change it if you were paid differently') +
+      ES.field('Date earned *', '<input type="date" name="date" value="' + (d ? new Date(d.closedAt) : new Date()).toISOString().slice(0, 10) + '">', 'Pick an earlier date to record past commissions') +
+      ES.field('Agent', ES.select('agentId', st.s.team.map(function (u) { return { v: u.id, l: u.name }; }), d ? d.agentId : ES.config.userId)) +
+      ES.field('Status', ES.select('status', [{ v: 'earned', l: 'Earned' }, { v: 'approved', l: 'Approved' }, { v: 'paid', l: 'Paid' }], d ? d.commissionStatus : 'paid')) +
+      (isNew ? ES.field('Type', ES.select('kind', [{ v: 'sale', l: 'Sale' }, { v: 'rent', l: 'Letting' }], 'sale')) : '') +
+      ES.field('Note', '<input name="note" value="' + esc(d && d.commissionNote || '') + '" placeholder="Optional">', '', isNew ? '' : 'span2') +
+      '</div></form><div class="ovl__foot">' + (d && d.manual ? '<button class="btn btn--danger" id="cmDel" style="margin-right:auto">Remove</button>' : (d && d.commissionAmount != null ? '<button class="btn" id="cmReset" style="margin-right:auto">Use standard rate</button>' : '')) + '<button class="btn" data-close>Cancel</button><button class="btn btn--dark" id="cmSave">' + I('check', 15) + (isNew ? 'Add commission' : 'Save changes') + '</button></div>', { label: title });
+    var fm = panel.querySelector('#cmf');
+    panel.querySelector('#cmSave').onclick = function () {
+      var v = ES.formData(fm);
+      var ok = ES.try(function () { return isNew ? st.addCommission(v) : st.editCommission(id, v); }, isNew ? 'Commission added' : 'Commission updated');
+      if (ok) { ES.close(); ES.app.refresh(); }
+    };
+    var del = panel.querySelector('#cmDel');
+    if (del) del.onclick = function () { ES.confirm({ title: 'Remove this commission?', icon: 'wallet', tone: 'red', ok: 'Remove', text: 'It will disappear from your totals and charts. This can’t be undone.', onOk: function () { ES.try(function () { st.removeCommission(id); }, 'Commission removed'); ES.app.refresh(); } }); };
+    var rs = panel.querySelector('#cmReset');
+    if (rs) rs.onclick = function () { ES.try(function () { st.resetCommission(id); }, 'Back to the standard rate'); ES.close(); ES.app.refresh(); };
+  }
   function statCard(l, v, sub, tone) { return '<article class="card stat"><span>' + ES.pill(l, tone) + '</span><b style="margin-top:6px">' + v + '</b><em>' + sub + '</em></article>'; }
   ES.statCard = statCard;
 })();

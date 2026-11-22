@@ -14,7 +14,7 @@
   var BOOT = window.RESIDE_BOOT || {};
   var API = '/admin/api.php';
   // Collections saved through the API (team, convs and website data are server-owned).
-  var SYNC = ['properties', 'contacts', 'leads', 'deals', 'events', 'docs', 'leases', 'payments', 'maintenance', 'applications', 'msgs', 'activity', 'notifications'];
+  var SYNC = ['properties', 'contacts', 'leads', 'deals', 'events', 'docs', 'leases', 'payments', 'maintenance', 'applications', 'msgs', 'activity', 'notifications', 'commissions'];
   var base = null, inflight = null, again = false, timer = null, lastErr = 0;
 
   function iso(d) { return (d || new Date()).toISOString(); }
@@ -48,7 +48,7 @@
   function adopt(state) {
     // Keep what the server sends, then fill anything the screens expect.
     state.seq = 100;
-    ['contacts', 'leads', 'deals', 'events', 'docs', 'leases', 'payments', 'maintenance', 'applications', 'msgs', 'activity', 'notifications', 'convs'].forEach(function (k) { state[k] = state[k] || []; });
+    ['contacts', 'leads', 'deals', 'events', 'docs', 'leases', 'payments', 'maintenance', 'applications', 'msgs', 'activity', 'notifications', 'commissions', 'convs'].forEach(function (k) { state[k] = state[k] || []; });
     state.properties.forEach(function (p) { p.notes = p.notes || []; p.images = p.images && p.images.length ? p.images : ['/assets/img/placeholder.jpg']; p.amenities = p.amenities || []; });
     state.leads.forEach(function (l) { l.notes = l.notes || []; });
     state.contacts.forEach(function (c) { c.notes = c.notes || []; c.comms = c.comms || []; c.types = c.types || ['buyer']; });
@@ -165,6 +165,8 @@
     listings: function () { return S.properties.filter(function (p) { return !p.archived; }); },
     commission: function (d) {
       if (!d) return 0;
+      if (d.commissionAmount != null && d.commissionAmount !== '') return Math.round(d.commissionAmount);
+      if (d.manual) return Math.round(d.amount || 0);
       if (d.kind === 'rent') return Math.round(d.value * (S.settings.rentMonths || 1));
       return Math.round(d.value * (d.rate != null ? d.rate : S.settings.saleRate) / 100);
     },
@@ -189,6 +191,10 @@
           if (d.stage !== 'won' || !d.closedAt) return;
           if (agentId && d.agentId !== agentId) return;
           if (store.monthKey(d.closedAt) === k) { sum += store.commission(d); cnt++; }
+        });
+        S.commissions.forEach(function (m) {
+          if (agentId && m.agentId !== agentId) return;
+          if (store.monthKey(m.closedAt) === k) { sum += store.commission(m); cnt++; }
         });
         out.push({ key: k, date: new Date(Math.floor(k / 12), k % 12, 1), value: sum, count: cnt });
       }
@@ -299,6 +305,38 @@
     setCommissionStatus: function (id, status) {
       var d = store.deal(id); d.commissionStatus = status;
       commit({ kind: 'commission', text: 'Commission on ' + store.prop(d.propertyId).title + ' marked ' + status, ref: { type: 'deal', id: id } });
+    },
+    // Edit what was earned on a closed deal: the amount, the date it was earned, the agent and the status.
+    editCommission: function (id, o) {
+      var d = store.deal(id) || byId(S.commissions, id); if (!d) fail('Commission record not found.');
+      if (!(o.amount >= 0) || o.amount === '') fail('Enter the commission amount.');
+      if (!o.date) fail('Choose the date it was earned.');
+      var when = new Date(o.date + 'T12:00'); if (isNaN(when)) fail('That date isn’t valid.');
+      if (d.manual) { d.amount = o.amount; d.title = (o.title || '').trim() || 'Commission'; }
+      else d.commissionAmount = o.amount;
+      d.closedAt = when.toISOString(); d.agentId = o.agentId || d.agentId; d.commissionStatus = o.status || d.commissionStatus; d.commissionNote = (o.note || '').trim();
+      commit({ kind: 'commission', text: 'Commission edited — ' + (d.manual ? d.title : store.prop(d.propertyId).title) + ' · ' + ES.fmt.money(o.amount, true), ref: d.manual ? undefined : { type: 'deal', id: id } });
+      return d;
+    },
+    addCommission: function (o) {
+      if (!(o.amount > 0)) fail('Enter the commission amount.');
+      if (!(o.title || '').trim()) fail('Say what the commission was for.');
+      var when = new Date((o.date || '') + 'T12:00'); if (isNaN(when)) fail('Choose the date it was earned.');
+      var m = { id: nid('cm'), manual: true, title: o.title.trim(), amount: o.amount, closedAt: when.toISOString(), agentId: o.agentId || ES.config.userId, commissionStatus: o.status || 'paid', commissionNote: (o.note || '').trim(), kind: o.kind === 'rent' ? 'rent' : 'sale', value: 0, createdAt: iso() };
+      S.commissions.unshift(m);
+      commit({ kind: 'commission', text: 'Commission added — ' + m.title + ' · ' + ES.fmt.money(m.amount, true) });
+      return m;
+    },
+    removeCommission: function (id) {
+      var m = byId(S.commissions, id); if (!m) fail('Only commissions you added by hand can be removed.');
+      S.commissions = S.commissions.filter(function (x) { return x.id !== id; });
+      commit({ kind: 'commission', text: 'Commission removed — ' + m.title });
+    },
+    // Put a deal’s commission back to the standard rate.
+    resetCommission: function (id) {
+      var d = store.deal(id); if (!d) fail('Deal not found.');
+      delete d.commissionAmount;
+      commit({ kind: 'commission', text: 'Commission reset to the standard rate — ' + store.prop(d.propertyId).title, ref: { type: 'deal', id: id } });
     },
     addDealNote: function (id, text) {
       if (!text.trim()) fail('Write a note first.');
